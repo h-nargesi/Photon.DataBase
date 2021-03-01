@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Photon.DataBase
+namespace Photon.Database
 {
     public class DatabaseException : Exception
     {

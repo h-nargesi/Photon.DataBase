@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 
-namespace Photon.DataBase
+namespace Photon.Database
 {
     //SDS: Sky Database Storing
-    public enum DataBaseTypes { SQL, OleDB }
+    public enum DatabaseTypes { SQL, OleDB, SQLite }
 
     public class ConnectionStringEventArgs : System.EventArgs
     {
-        public ConnectionStringEventArgs(DataBaseTypes dbType)
+        public ConnectionStringEventArgs(DatabaseTypes dbType)
         {
             DBType = dbType;
         }
 
-        public readonly DataBaseTypes DBType;
+        public readonly DatabaseTypes DBType;
     }
     public delegate void ConnectionStingSetHandler(object sender, ConnectionStringEventArgs e);
 

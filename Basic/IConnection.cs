@@ -7,12 +7,12 @@ using System.Data.Common;
 using System.Data.OleDb;
 using System.Data.SqlClient;
 
-namespace Photon.DataBase
+namespace Photon.Database
 {
     public interface IConnection : IEnumerable, IDisposable
     {
         event ConnectionStingSetHandler ConnectionStringChange;
-        event EventHandler DataBaseTypeChange;
+        event EventHandler DatabaseTypeChange;
 
         IConnection Clone();
 
@@ -39,7 +39,7 @@ namespace Photon.DataBase
         CommandType CommandType { set; get; }
         DbParameterCollection Parameters { get; }
         ConnectionPath ConnectionString { set; get; }
-        DataBaseTypes DBType { set; get; }
+        DatabaseTypes DBType { set; get; }
         bool ReaderIsClosed { get; }
         ConnectionState State { get; }
         int FieldCount { get; }

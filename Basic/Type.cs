@@ -4,7 +4,7 @@ using System.Data;
 using System.Data.OleDb;
 using System.Data.SqlClient;
 
-namespace Photon.DataBase
+namespace Photon.Database
 {
     public static class SqlTypeComparetion
     {

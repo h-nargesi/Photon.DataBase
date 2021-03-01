@@ -6,7 +6,7 @@ using System.Text;
 using System.Net;
 using System.IO;
 
-namespace Photon.DataBase.Connection
+namespace Photon.Database.Connection
 {
     public class InternetAccessClient : IConnection
     {

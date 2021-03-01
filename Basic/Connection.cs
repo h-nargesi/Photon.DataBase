@@ -3,11 +3,12 @@ using System.Data;
 using System.Data.Common;
 using System.Data.OleDb;
 using System.Data.SqlClient;
+using System.Data.SQLite;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Photon.DataBase
+namespace Photon.Database
 {
     public class Connection : IConnection, IEnumerable, IDisposable
     {
@@ -19,10 +20,10 @@ namespace Photon.DataBase
         private DbDataAdapter adr;
         private ConnectionPath path;
 
-        private DataBaseTypes dbType;
+        private DatabaseTypes dbType;
 
         public event ConnectionStingSetHandler ConnectionStringChange;
-        public event EventHandler DataBaseTypeChange;
+        public event EventHandler DatabaseTypeChange;
 
         public event SqlInfoMessageEventHandler InfoMessage
         {
@@ -48,23 +49,27 @@ namespace Photon.DataBase
         #endregion
 
 
-        public Connection(DataBaseTypes DBType)
+        public Connection(DatabaseTypes DBType)
         {
             dbType = DBType;
 
             switch (dbType)
             {
-                case DataBaseTypes.OleDB:
+                case DatabaseTypes.OleDB:
                     con = new OleDbConnection();
                     com = new OleDbCommand();
                     break;
-                case DataBaseTypes.SQL:
+                case DatabaseTypes.SQL:
                     con = new SqlConnection();
                     com = new SqlCommand();
                     break;
+                case DatabaseTypes.SQLite:
+                    con = new SQLiteConnection();
+                    com = new SQLiteCommand();
+                    break;
                 default:
-                    throw new ArgumentOutOfRangeException
-                        ("DBType", "DataBase type is only OleDB or SQL");
+                    throw new ArgumentOutOfRangeException(
+                        "DBType", "Database type is not valid.");
             }
         }
 
@@ -132,12 +137,10 @@ namespace Photon.DataBase
             get { return con.Database; }
         }
 
-        public DataBaseTypes DBType
+        public DatabaseTypes DBType
         {
             set
             {
-                if (value > DataBaseTypes.OleDB)
-                    throw new ArgumentOutOfRangeException("DBType", "DataBase type is only OleDB or SQL");
                 if (dbType != value)
                 {
                     dbType = value;
@@ -147,17 +150,24 @@ namespace Photon.DataBase
                     path = null;
                     switch (value)
                     {
-                        case DataBaseTypes.OleDB:
+                        case DatabaseTypes.OleDB:
                             con = new OleDbConnection();
                             com = new OleDbCommand();
                             break;
-                        case DataBaseTypes.SQL:
+                        case DatabaseTypes.SQL:
                             con = new SqlConnection();
                             com = new SqlCommand();
                             break;
+                        case DatabaseTypes.SQLite:
+                            con = new SQLiteConnection();
+                            com = new SQLiteCommand();
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(
+                                "DBType", "Database type is not valid.");
                     }
-                    if (DataBaseTypeChange != null)
-                        this.DataBaseTypeChange(this, new EventArgs());
+                    if (DatabaseTypeChange != null)
+                        this.DatabaseTypeChange(this, new EventArgs());
                 }
             }
             get { return dbType; }
@@ -191,15 +201,15 @@ namespace Photon.DataBase
             {
                 switch (dbType)
                 {
-                    case DataBaseTypes.OleDB:
+                    case DatabaseTypes.OleDB:
                         adr = new OleDbDataAdapter();
                         break;
-                    case DataBaseTypes.SQL:
+                    case DatabaseTypes.SQL:
                         adr = new SqlDataAdapter();
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException
-                            ("DBType", "DataBase type is only OleDB or SQL");
+                        throw new ArgumentOutOfRangeException(
+                            "DBType", "Database type is not valid.");
                 }
 
                 return adr;
@@ -295,14 +305,20 @@ namespace Photon.DataBase
             DbParameter param = null;
             switch (dbType)
             {
-                case DataBaseTypes.SQL:
+                case DatabaseTypes.SQL:
                     param = new SqlParameter();
                     break;
-                case DataBaseTypes.OleDB:
+                case DatabaseTypes.OleDB:
                     param = new OleDbParameter();
                     break;
+                case DatabaseTypes.SQLite:
+                    param = new SQLiteParameter();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(
+                        "DBType", "Database type is not valid.");
             }
-
+            
             if (param == null) return null;
 
             param.ParameterName = name;
@@ -319,7 +335,7 @@ namespace Photon.DataBase
             DbParameter param = null;
             switch (dbType)
             {
-                case DataBaseTypes.SQL:
+                case DatabaseTypes.SQL:
                     param = new SqlParameter();
                     switch (type)
                     {
@@ -358,7 +374,7 @@ namespace Photon.DataBase
                             break;
                     }
                     break;
-                case DataBaseTypes.OleDB:
+                case DatabaseTypes.OleDB:
                     param = new OleDbParameter();
                     switch (type)
                     {
@@ -394,6 +410,45 @@ namespace Photon.DataBase
                             break;
                     }
                     break;
+                case DatabaseTypes.SQLite:
+                    param = new SQLiteParameter();
+                    switch (type)
+                    {
+                        case SingleType.Boolean:
+                            param.DbType = DbType.Boolean;
+                            break;
+                        case SingleType.Byte:
+                            param.DbType = DbType.Byte;
+                            break;
+                        case SingleType.Date:
+                            param.DbType = DbType.Date;
+                            break;
+                        case SingleType.Int:
+                            param.DbType = DbType.Int32;
+                            break;
+                        case SingleType.Long:
+                            param.DbType = DbType.Int64;
+                            break;
+                        case SingleType.Decimal:
+                            param.DbType = DbType.Decimal;
+                            break;
+                        case SingleType.Real:
+                            param.DbType = DbType.Double;
+                            break;
+                        case SingleType.Short:
+                            param.DbType = DbType.Int16;
+                            break;
+                        case SingleType.Variant:
+                            param.DbType = DbType.VarNumeric;
+                            break;
+                        case SingleType.Guid:
+                            param.DbType = DbType.Guid;
+                            break;
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(
+                        "DBType", "Database type is not valid.");
             }
 
             if (param == null) return null;
@@ -412,7 +467,7 @@ namespace Photon.DataBase
             DbParameter param = null;
             switch (dbType)
             {
-                case DataBaseTypes.SQL:
+                case DatabaseTypes.SQL:
                     param = new SqlParameter();
                     switch (type)
                     {
@@ -436,7 +491,7 @@ namespace Photon.DataBase
                             break;
                     }
                     break;
-                case DataBaseTypes.OleDB:
+                case DatabaseTypes.OleDB:
                     param = new OleDbParameter();
                     switch (type)
                     {
@@ -460,6 +515,25 @@ namespace Photon.DataBase
                             break;
                     }
                     break;
+                case DatabaseTypes.SQLite:
+                    param = new SQLiteParameter();
+                    switch (type)
+                    {
+                        case StringType.NChar:
+                        case StringType.Char:
+                        case StringType.NVarchar:
+                        case StringType.Varchar:
+                            param.DbType = DbType.String;
+                            break;
+                        case StringType.Binary:
+                        case StringType.Varbinary:
+                            param.DbType = DbType.Binary;
+                            break;
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(
+                        "DBType", "Database type is not valid.");
             }
 
             if (param == null) return null;
@@ -479,15 +553,14 @@ namespace Photon.DataBase
             DbParameter param = null;
             switch (dbType)
             {
-                case DataBaseTypes.SQL:
+                case DatabaseTypes.SQL:
                     param = new SqlParameter();
                     ((SqlParameter)param).SqlDbType = SqlDbType.Udt;
                     ((SqlParameter)param).UdtTypeName = UdtTypeName;
                     break;
-                case DataBaseTypes.OleDB:
-                    //param = new OleDbParameter();
-                    //((OleDbParameter)param).OleDbType = OleDbType.VarWChar;
-                    throw new Exception("Invalid Udt for Oledb");
+                default:
+                    throw new ArgumentOutOfRangeException(
+                        "DBType", "Database type is not valid.");
             }
 
             if (param == null) return null;

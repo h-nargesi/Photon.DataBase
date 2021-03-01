@@ -1,4 +1,4 @@
-﻿#if DEBUG
+﻿#if DEBUG_OLD
 using System;
 using System.Collections.Generic;
 using System.IO;
