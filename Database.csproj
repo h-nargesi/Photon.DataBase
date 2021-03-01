@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <RootNamespace>Photon.DataBase</RootNamespace>
+    <RootNamespace>Photon.Database</RootNamespace>
     <AssemblyName>photon.database</AssemblyName>
     <LangVersion>8.0</LangVersion>
     <Version>2.3.0.57</Version>
