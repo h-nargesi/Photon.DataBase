@@ -94,8 +94,8 @@ namespace Photon.DataBase
         }
         public CommandType CommandType
         {
-            get { return (CommandType)(int)com.CommandType; }
-            set { com.CommandType = (System.Data.CommandType)(int)value; }
+            get { return com.CommandType; }
+            set { com.CommandType = value; }
         }
         public DbParameterCollection Parameters
         {
@@ -206,26 +206,17 @@ namespace Photon.DataBase
             };
         }
 
-        public void AddParameter(DbParameter parameter)
-        {
-            com.Parameters.Add(parameter);
-        }
-
-        public SqlParameter AddSqlParameter(string name, bool isOut = false)
+        public void AddSqlParameter(string name, object value, bool isOut = false)
         {
             name = name.TrimStart();
             if (!name.StartsWith("@")) name = "@" + name;
 
-            SqlParameter param = new SqlParameter
-            {
-                ParameterName = name
-            };
+            SqlParameter param = new SqlParameter(name, value);
             if (isOut) param.Direction = ParameterDirection.InputOutput;
 
             com.Parameters.Add(param);
-            return param;
         }
-        public SqlParameter AddSqlParameter(string name, SqlDbType type, int? size, bool isOut = false)
+        public void AddSqlParameter(string name, SqlDbType type, int? size, object value, bool isOut = false)
         {
             name = name.TrimStart();
             if (!name.StartsWith("@")) name = "@" + name;
@@ -233,15 +224,15 @@ namespace Photon.DataBase
             SqlParameter param = new SqlParameter
             {
                 ParameterName = name,
-                SqlDbType = type
+                SqlDbType = type,
+                Value = value
             };
             if (isOut) param.Direction = ParameterDirection.InputOutput;
             if (size.HasValue) param.Size = size.Value;
 
             com.Parameters.Add(param);
-            return param;
         }
-        public SqlParameter AddSqlParameter(string name, string UdtTypeName, bool isOut = false)
+        public void AddSqlParameter(string name, string UdtTypeName, object value, bool isOut = false)
         {
             name = name.TrimStart();
             if (!name.StartsWith("@")) name = "@" + name;
@@ -250,12 +241,39 @@ namespace Photon.DataBase
             {
                 ParameterName = name,
                 SqlDbType = SqlDbType.Udt,
-                UdtTypeName = UdtTypeName
+                UdtTypeName = UdtTypeName,
+                Value = value,
             };
             if (isOut) param.Direction = ParameterDirection.InputOutput;
 
             com.Parameters.Add(param);
-            return param;
+        }
+
+        public void AddOleDbParameter(string name, object value, bool isOut = false)
+        {
+            name = name.TrimStart();
+            if (!name.StartsWith("@")) name = "@" + name;
+
+            OleDbParameter param = new OleDbParameter(name, value);
+            if (isOut) param.Direction = ParameterDirection.InputOutput;
+
+            com.Parameters.Add(param);
+        }
+        public void AddOleDbParameter(string name, OleDbType type, int? size, object value, bool isOut = false)
+        {
+            name = name.TrimStart();
+            if (!name.StartsWith("@")) name = "@" + name;
+
+            OleDbParameter param = new OleDbParameter
+            {
+                ParameterName = name,
+                OleDbType = type,
+                Value = value
+            };
+            if (isOut) param.Direction = ParameterDirection.InputOutput;
+            if (size.HasValue) param.Size = size.Value;
+
+            com.Parameters.Add(param);
         }
 
         public DbParameter AddParameter(string name, bool isOut = false)

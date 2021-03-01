@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Data.Common;
 using System.Text;
+using System.Data.OleDb;
 
 namespace Photon.DataBase
 {
@@ -42,11 +43,12 @@ namespace Photon.DataBase
         ConnectionState State { get; }
         int FieldCount { get; }
 
-        void AddParameter(DbParameter parameter);
+        void AddSqlParameter(string name, object value, bool isOut = false);
+        void AddSqlParameter(string name, SqlDbType type, int? size, object value, bool isOut = false);
+        void AddSqlParameter(string name, string UdtTypeName, object value, bool isOut = false);
 
-        SqlParameter AddSqlParameter(string name, bool isOut = false);
-        SqlParameter AddSqlParameter(string name, SqlDbType type, int? size, bool isOut = false);
-        SqlParameter AddSqlParameter(string name, string UdtTypeName, bool isOut = false);
+        void AddOleDbParameter(string name, object value, bool isOut = false);
+        void AddOleDbParameter(string name, OleDbType type, int? size, object value, bool isOut = false);
 
         DbParameter AddParameter(string name, bool isOut = false);
         DbParameter AddParameter(string name, SingleType type, bool isOut = false);
