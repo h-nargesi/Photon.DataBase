@@ -112,7 +112,6 @@
     <Compile Include="Basic\Connection.cs" />
     <Compile Include="Basic\ConnectionPath.cs" />
     <Compile Include="Basic\Exception.cs" />
-    <Compile Include="Basic\GetSpesialTypes.cs" />
     <Compile Include="Basic\IConnection.cs" />
     <None Include="app.config" />
     <Compile Include="Internet\InternetAccessClient.cs" />

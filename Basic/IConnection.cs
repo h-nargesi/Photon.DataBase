@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
-using System.Data.Common;
 using System.Text;
+using System.Data;
+using System.Data.Common;
 using System.Data.OleDb;
+using System.Data.SqlClient;
 
 namespace Photon.DataBase
 {
@@ -18,9 +18,10 @@ namespace Photon.DataBase
 
         void Open();
         int ExecuteNonQuery();
-        void ExecuteReader();
+        DbDataReader ExecuteReader();
         object ExecuteScalar();
         bool Read();
+        bool NextResult();
         void CloseConnection();
         void CloseReader();
         void Close();
@@ -32,9 +33,9 @@ namespace Photon.DataBase
 
         object this[int index] { get; }
         object this[string index] { get; }
-        GetSpesialTypes Values { get; }
 
         string CommandText { set; get; }
+        int CommandTimeout { get; set; }
         CommandType CommandType { set; get; }
         DbParameterCollection Parameters { get; }
         ConnectionPath ConnectionString { set; get; }
@@ -43,12 +44,12 @@ namespace Photon.DataBase
         ConnectionState State { get; }
         int FieldCount { get; }
 
-        void AddSqlParameter(string name, object value, bool isOut = false);
-        void AddSqlParameter(string name, SqlDbType type, int? size, object value, bool isOut = false);
-        void AddSqlParameter(string name, string UdtTypeName, object value, bool isOut = false);
+        DbParameter AddSqlParameter(string name, bool isOut = false);
+        DbParameter AddSqlParameter(string name, SqlDbType type, int? size, bool isOut = false);
+        DbParameter AddSqlParameter(string name, string UdtTypeName, bool isOut = false);
 
-        void AddOleDbParameter(string name, object value, bool isOut = false);
-        void AddOleDbParameter(string name, OleDbType type, int? size, object value, bool isOut = false);
+        DbParameter AddOleDbParameter(string name, bool isOut = false);
+        DbParameter AddOleDbParameter(string name, OleDbType type, int? size, bool isOut = false);
 
         DbParameter AddParameter(string name, bool isOut = false);
         DbParameter AddParameter(string name, SingleType type, bool isOut = false);

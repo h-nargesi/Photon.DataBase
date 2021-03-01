@@ -12,13 +12,11 @@ namespace Photon.DataBase
     public class Connection : IConnection, IEnumerable, IDisposable
     {
         #region Fields, Events:
-
         private DbConnection con;
         private DbCommand com;
         private DbDataReader cor;
         private bool cor_is_reading;
         private DbDataAdapter adr;
-        private GetSpesialTypes get_value;
         private ConnectionPath path;
 
         private DataBaseTypes dbType;
@@ -47,7 +45,6 @@ namespace Photon.DataBase
             add { con.Disposed += value; }
             remove { con.Disposed -= value; }
         }
-
         #endregion
 
 
@@ -73,24 +70,34 @@ namespace Photon.DataBase
 
 
         #region Properties:
-
         public object this[int index]
         {
-            get { return cor[index]; }
+            get
+            {
+                if (cor == null)
+                    throw new DatabaseException("The command not executed.");
+                return cor[index];
+            }
         }
         public object this[string index]
         {
-            get { return cor[index]; }
-        }
-        public GetSpesialTypes Values
-        {
-            get { return get_value; }
+            get
+            {
+                if (cor == null)
+                    throw new DatabaseException("The command not executed.");
+                return cor[index];
+            }
         }
 
         public string CommandText
         {
             get { return com.CommandText; }
             set { com.CommandText = value; }
+        }
+        public int CommandTimeout
+        {
+            get { return com.CommandTimeout; }
+            set { com.CommandTimeout = value; }
         }
         public CommandType CommandType
         {
@@ -170,7 +177,12 @@ namespace Photon.DataBase
         }
         public int FieldCount
         {
-            get { return cor == null ? 0 : cor.FieldCount; }
+            get
+            {
+                if (cor == null)
+                    throw new DatabaseException("The command not executed.");
+                return cor.FieldCount;
+            }
         }
 
         public DbDataAdapter Adapter
@@ -196,27 +208,22 @@ namespace Photon.DataBase
         #endregion
 
 
-        #region Method:
-
-        public IConnection Clone()
-        {
-            return new Connection(dbType)
-            {
-                ConnectionString = ConnectionString
-            };
-        }
-
-        public void AddSqlParameter(string name, object value, bool isOut = false)
+        #region Parameters:
+        public DbParameter AddSqlParameter(string name, bool isOut = false)
         {
             name = name.TrimStart();
             if (!name.StartsWith("@")) name = "@" + name;
 
-            SqlParameter param = new SqlParameter(name, value);
+            SqlParameter param = new SqlParameter()
+            {
+                ParameterName = name
+            };
             if (isOut) param.Direction = ParameterDirection.InputOutput;
 
             com.Parameters.Add(param);
+            return param;
         }
-        public void AddSqlParameter(string name, SqlDbType type, int? size, object value, bool isOut = false)
+        public DbParameter AddSqlParameter(string name, SqlDbType type, int? size, bool isOut = false)
         {
             name = name.TrimStart();
             if (!name.StartsWith("@")) name = "@" + name;
@@ -224,15 +231,15 @@ namespace Photon.DataBase
             SqlParameter param = new SqlParameter
             {
                 ParameterName = name,
-                SqlDbType = type,
-                Value = value
+                SqlDbType = type
             };
             if (isOut) param.Direction = ParameterDirection.InputOutput;
             if (size.HasValue) param.Size = size.Value;
 
             com.Parameters.Add(param);
+            return param;
         }
-        public void AddSqlParameter(string name, string UdtTypeName, object value, bool isOut = false)
+        public DbParameter AddSqlParameter(string name, string UdtTypeName, bool isOut = false)
         {
             name = name.TrimStart();
             if (!name.StartsWith("@")) name = "@" + name;
@@ -242,24 +249,28 @@ namespace Photon.DataBase
                 ParameterName = name,
                 SqlDbType = SqlDbType.Udt,
                 UdtTypeName = UdtTypeName,
-                Value = value,
             };
             if (isOut) param.Direction = ParameterDirection.InputOutput;
 
             com.Parameters.Add(param);
+            return param;
         }
 
-        public void AddOleDbParameter(string name, object value, bool isOut = false)
+        public DbParameter AddOleDbParameter(string name, bool isOut = false)
         {
             name = name.TrimStart();
             if (!name.StartsWith("@")) name = "@" + name;
 
-            OleDbParameter param = new OleDbParameter(name, value);
+            OleDbParameter param = new OleDbParameter()
+            {
+                ParameterName = name
+            };
             if (isOut) param.Direction = ParameterDirection.InputOutput;
 
             com.Parameters.Add(param);
+            return param;
         }
-        public void AddOleDbParameter(string name, OleDbType type, int? size, object value, bool isOut = false)
+        public DbParameter AddOleDbParameter(string name, OleDbType type, int? size, bool isOut = false)
         {
             name = name.TrimStart();
             if (!name.StartsWith("@")) name = "@" + name;
@@ -267,13 +278,13 @@ namespace Photon.DataBase
             OleDbParameter param = new OleDbParameter
             {
                 ParameterName = name,
-                OleDbType = type,
-                Value = value
+                OleDbType = type
             };
             if (isOut) param.Direction = ParameterDirection.InputOutput;
             if (size.HasValue) param.Size = size.Value;
 
             com.Parameters.Add(param);
+            return param;
         }
 
         public DbParameter AddParameter(string name, bool isOut = false)
@@ -487,6 +498,17 @@ namespace Photon.DataBase
 
             return param;
         }
+        #endregion
+
+
+        #region Method:
+        public IConnection Clone()
+        {
+            return new Connection(dbType)
+            {
+                ConnectionString = ConnectionString
+            };
+        }
 
         public void Open()
         {
@@ -497,11 +519,11 @@ namespace Photon.DataBase
         {
             return com.ExecuteNonQuery();
         }
-        public void ExecuteReader()
+        public DbDataReader ExecuteReader()
         {
             cor_is_reading = false;
             cor = com.ExecuteReader();
-            get_value = new GetSpesialTypes(cor);
+            return cor;
         }
         public object ExecuteScalar()
         {
@@ -509,7 +531,16 @@ namespace Photon.DataBase
         }
         public bool Read()
         {
+            if (cor == null)
+                throw new DatabaseException("The command not executed.");
             cor_is_reading = cor.Read();
+            return cor_is_reading;
+        }
+        public bool NextResult()
+        {
+            if (cor == null)
+                throw new DatabaseException("The command not executed.");
+            cor_is_reading = cor.NextResult();
             return cor_is_reading;
         }
         public void CloseConnection()
@@ -518,6 +549,7 @@ namespace Photon.DataBase
         }
         public void CloseReader()
         {
+            cor_is_reading = false;
             if (cor != null) cor.Close();
         }
         public void Dispose()
@@ -529,26 +561,34 @@ namespace Photon.DataBase
 
         public byte[] GetBytes(int index)
         {
+            if (cor == null)
+                throw new DatabaseException("The command not executed.");
             return cor.GetValue(index) as byte[];
         }
         public byte[] GetBytes(string index)
         {
+            if (cor == null)
+                throw new DatabaseException("The command not executed.");
             return cor.GetValue(cor.GetOrdinal(index)) as byte[];
         }
         public string GetName(int index)
         {
+            if (cor == null)
+                throw new DatabaseException("The command not executed.");
             return cor.GetName(index);
         }
         public int GetOrdinal(string name)
         {
+            if (cor == null)
+                throw new DatabaseException("The command not executed.");
             return cor.GetOrdinal(name);
         }
         public IEnumerator GetEnumerator()
         {
-            if (cor == null) return null;
+            if (cor == null)
+                throw new DatabaseException("The command not executed.");
             else return cor.GetEnumerator();
         }
-
 
         //I DB Connection
         public void Close()
@@ -557,7 +597,6 @@ namespace Photon.DataBase
                 cor.Close();
             con.Close();
         }
-
         #endregion
     }
 }
