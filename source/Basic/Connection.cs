@@ -120,8 +120,11 @@ namespace Photon.Database
             get { return path; }
             set
             {
-                path = value.Copy();
-                con.ConnectionString = path.ToString();
+                if (value == null) path = null;
+                else {
+                    path = value.Copy();
+                    con.ConnectionString = path.ToString();
+                }
                 if (ConnectionStringChange != null)
                     this.ConnectionStringChange(this, new ConnectionStringEventArgs(dbType));
             }
