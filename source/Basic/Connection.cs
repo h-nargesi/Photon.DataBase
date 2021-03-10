@@ -16,6 +16,7 @@ namespace Photon.Database
         private DbConnection con;
         private DbCommand com;
         private DbDataReader cor;
+        private DbTransaction trx;
         private bool cor_is_reading;
         private DbDataAdapter adr;
         private ConnectionPath path;
@@ -621,6 +622,7 @@ namespace Photon.Database
         }
         public void CloseConnection()
         {
+            if (trx != null) Rollback();
             con.Close();
         }
         public void CloseReader()
@@ -631,8 +633,32 @@ namespace Photon.Database
         public void Dispose()
         {
             if (cor != null) cor.Dispose();
+            if (trx != null) Rollback();
             if (com != null) com.Dispose();
             if (con != null) con.Dispose();
+        }
+
+        public void BeginTransaction()
+        {
+            trx = con.BeginTransaction();
+        }
+        public bool HasTransaction
+        {
+            get { return trx != null; }
+        }
+        public void Commit()
+        {
+            if (trx == null) throw new Exception("The transaction is not started.");
+            
+            trx.Commit();
+            trx = null;
+        }
+        public void Rollback()
+        {
+            if (trx == null) throw new Exception("The transaction is not started.");
+            
+            trx.Rollback();
+            trx = null;
         }
 
         public byte[] GetBytes(int index)
@@ -669,8 +695,8 @@ namespace Photon.Database
         //I DB Connection
         public void Close()
         {
-            if (cor != null && !cor.IsClosed)
-                cor.Close();
+            if (cor != null && !cor.IsClosed) cor.Close();
+            if (trx != null) Rollback();
             con.Close();
         }
         #endregion

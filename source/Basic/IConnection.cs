@@ -26,6 +26,11 @@ namespace Photon.Database
         void CloseReader();
         void Close();
 
+        void BeginTransaction();
+        bool HasTransaction { get; }
+        void Commit();
+        void Rollback();
+
         byte[] GetBytes(string index);
         byte[] GetBytes(int index);
         string GetName(int index);
