@@ -9,11 +9,11 @@ namespace Photon.Database
         public abstract ConnectionPath Copy();
     }
 
-    public class SqliteConnectionString : ConnectionPath
+    public class SqliteConnectionPath : ConnectionPath
     {
-        public SqliteConnectionString(string path) : this(path, null) {}
+        public SqliteConnectionPath(string path) : this(path, null) {}
         
-        public SqliteConnectionString(string path, string password) {
+        public SqliteConnectionPath(string path, string password) {
             if (String.IsNullOrEmpty(path))
                 throw new InvalidDataException("The path is null or empty.");
             this.path = path;
@@ -24,7 +24,7 @@ namespace Photon.Database
         
         public override ConnectionPath Copy()
         {
-            return new SqliteConnectionString(path, password);
+            return new SqliteConnectionPath(path, password);
         }
 
         public override string ToString()
