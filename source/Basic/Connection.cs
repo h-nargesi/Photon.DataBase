@@ -53,20 +53,20 @@ namespace Photon.Database
         }
         public void CloseConnection()
         {
-            if (trx != null) Rollback();
+            Rollback();
             con.Close();
         }
         public void Close()
         {
             if (cor != null && !cor.IsClosed) cor.Close();
-            if (trx != null) Rollback();
+            Rollback();
             con.Close();
         }
 
         public void Dispose()
         {
             if (cor != null) cor.Dispose();
-            if (trx != null) Rollback();
+            Rollback();
             com.Dispose();
             con.Dispose();
         }
@@ -84,17 +84,17 @@ namespace Photon.Database
         }
         public void Commit()
         {
-            if (trx == null) throw new Exception("The transaction is not started.");
-
-            trx.Commit();
-            trx = null;
+            if (trx != null) {
+                trx.Commit();
+                trx = null;
+            }
         }
         public void Rollback()
         {
-            if (trx == null) throw new Exception("The transaction is not started.");
-
-            trx.Rollback();
-            trx = null;
+            if (trx != null) {
+                trx.Rollback();
+                trx = null;
+            }
         }
         #endregion
 
