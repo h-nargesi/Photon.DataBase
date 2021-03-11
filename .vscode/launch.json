@@ -8,7 +8,7 @@
             "name": ".NET Core Launch (console)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
+            "preLaunchTask": "build debug",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/source/bin/Debug/netcoreapp3.1/photon.database.dll",
             "args": [],
@@ -17,6 +17,12 @@
             // integratedTerminal
             "console": "externalTerminal",
             "stopAtEntry": false
+        },
+        {
+            "name": ".NET Core Launch (release)",
+            "type": "coreclr",
+            "request": "attach",
+            "preLaunchTask": "build release"
         },
         {
             "name": ".NET Core Attach",
