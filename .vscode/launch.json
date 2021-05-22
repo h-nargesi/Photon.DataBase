@@ -22,7 +22,8 @@
             "name": ".NET Core Launch (release)",
             "type": "coreclr",
             "request": "attach",
-            "preLaunchTask": "build release"
+            "preLaunchTask": "build release",
+            "processId": "${command:pickProcess}"
         },
         {
             "name": ".NET Core Attach",

@@ -5,7 +5,7 @@
     <RootNamespace>Photon.Database</RootNamespace>
     <AssemblyName>photon.database</AssemblyName>
     <LangVersion>8.0</LangVersion>
-    <Version>2.3.0.57</Version>
+    <Version>2.4.0.58</Version>
     <Authors>Hamed Nargesi</Authors>
   </PropertyGroup>
 
