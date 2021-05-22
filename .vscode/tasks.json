@@ -16,7 +16,7 @@
         {
             "label": "build release",
             "command": "dotnet",
-            "type": "process",
+            "type": "shell",
             "args": [
                 "build",
                 "${workspaceFolder}/source/Database.csproj",
