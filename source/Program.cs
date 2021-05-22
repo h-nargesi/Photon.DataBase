@@ -1,4 +1,5 @@
 ﻿#if DEBUG
+/*
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -351,4 +352,5 @@ namespace Photon.DataBase
         //class 
     }
 }
+*/
 #endif

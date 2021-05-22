@@ -133,6 +133,27 @@ namespace Photon.Database
         {
             return com.ExecuteScalar();
         }
+        public int ExecuteNonQuerySafe()
+        {
+            if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
+                con.Open();
+            return com.ExecuteNonQuery();
+        }
+        public DbDataReader ExecuteReaderSafe()
+        {
+            if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
+                con.Open();
+                
+            cor_is_reading = false;
+            cor = com.ExecuteReader();
+            return cor;
+        }
+        public object ExecuteScalarSafe()
+        {
+            if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
+                con.Open();
+            return com.ExecuteScalar();
+        }
         #endregion
 
 
