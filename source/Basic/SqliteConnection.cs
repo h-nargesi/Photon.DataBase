@@ -5,6 +5,7 @@ using System.Data.SQLite;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using System.Reflection;
 
 namespace Photon.Database
 {
@@ -83,63 +84,55 @@ namespace Photon.Database
         {
             get { return com.Parameters; }
         }
-        SQLiteParameter ISqliteConnection.AddParameter(string name, bool output)
+
+        protected override DbParameter SetParam(MemberInfo member)
         {
-            name = name.TrimStart();
-            if (!name.StartsWith("@")) name = "@" + name;
+            var attribute = member.GetCustomAttribute<SqliteParam>();
+            if (attribute == null) return null;
 
-            SQLiteParameter param = new SQLiteParameter()
-            {
-                ParameterName = name,
-                Direction = output ? ParameterDirection.InputOutput : ParameterDirection.Input
-            };
+            string name = attribute.Name ?? member.Name;
+            if (name == null)
+                throw new ArgumentNullException(nameof(name), "Can not insert parameter without name.");
+            else if (!name.StartsWith("@")) name = "@" + name;
 
-            com.Parameters.Add(param);
-            return param;
-        }
-        SQLiteParameter ISqliteConnection.AddParameter(string name, DbType type, bool output)
-        {
-            name = name.TrimStart();
-            if (!name.StartsWith("@")) name = "@" + name;
+            SQLiteParameter parameter;
+            // find the exists parameter
+            if (com.Parameters.Contains(name)) parameter = com.Parameters[name];
+            // create new if not exists
+            else parameter = new SQLiteParameter() { ParameterName = name };
 
-            SQLiteParameter param = new SQLiteParameter
-            {
-                ParameterName = name,
-                DbType = type,
-                Direction = output ? ParameterDirection.InputOutput : ParameterDirection.Input
-            };
+            if (attribute.Type != null) parameter.DbType = attribute.Type.Value;
+            if (attribute.Size != null) parameter.Size = attribute.Size.Value;
 
-            com.Parameters.Add(param);
-            return param;
-        }
-        SQLiteParameter ISqliteConnection.AddParameter(string name, DbType type, int size, bool output)
-        {
-            name = name.TrimStart();
-            if (!name.StartsWith("@")) name = "@" + name;
-
-            SQLiteParameter param = new SQLiteParameter
-            {
-                ParameterName = name,
-                DbType = type,
-                Size = size,
-                Direction = output ? ParameterDirection.InputOutput : ParameterDirection.Input
-            };
-
-            com.Parameters.Add(param);
-            return param;
+            return parameter;
         }
 
-        public override DbParameter AddParameter(string name, bool output = false)
+        protected override DbParameter SetParam(string name,
+            object type = null, int? size = null, bool? output = null)
         {
-            return ((ISqliteConnection)this).AddParameter(name, output);
+            if (type is DbType db_type || type is string str_type && Enum.TryParse(str_type, out db_type))
+                return (this as ISqliteConnection).SetParameter(name, db_type, size, output);
+            else return (this as ISqliteConnection).SetParameter(name, null, size, output);
         }
-        public override DbParameter AddParameter(string name, DbType type, bool output = false)
+
+        SQLiteParameter ISqliteConnection.SetParameter(string name, DbType? type, int? size, bool? output)
         {
-            return ((ISqliteConnection)this).AddParameter(name, type, output);
-        }
-        public override DbParameter AddParameter(string name, DbType type, int size, bool output = false)
-        {
-            return ((ISqliteConnection)this).AddParameter(name, type, size, output);
+            if (name == null)
+                throw new ArgumentNullException(nameof(name), "Can not insert parameter without name.");
+            else if (!name.StartsWith("@")) name = "@" + name;
+
+            SQLiteParameter parameter;
+            // find the exists parameter
+            if (com.Parameters.Contains(name)) parameter = com.Parameters[name];
+            // create new if not exists
+            else parameter = new SQLiteParameter() { ParameterName = name };
+
+            if (type != null) parameter.DbType = type.Value;
+            if (size != null) parameter.Size = size.Value;
+            if (output != null) parameter.Direction = output.Value ?
+                    ParameterDirection.InputOutput : ParameterDirection.Input;
+
+            return parameter;
         }
         #endregion
 

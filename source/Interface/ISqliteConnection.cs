@@ -13,8 +13,6 @@ namespace Photon.Database
 
         new SQLiteParameterCollection Parameters { get; }
 
-        new SQLiteParameter AddParameter(string name, bool output = false);
-        new SQLiteParameter AddParameter(string name, DbType type, bool output = false);
-        new SQLiteParameter AddParameter(string name, DbType type, int size, bool output = false);
+        new SQLiteParameter SetParameter(string name, DbType? type = null, int? size = null, bool? output = null);
     }
 }

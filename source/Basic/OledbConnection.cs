@@ -5,6 +5,7 @@ using System.Data.OleDb;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using System.Reflection;
 
 namespace Photon.Database
 {
@@ -83,53 +84,61 @@ namespace Photon.Database
         {
             get { return com.Parameters; }
         }
-        OleDbParameter IOledbConnection.AddParameter(string name, bool output)
+
+        protected override DbParameter SetParam(MemberInfo member)
         {
-            name = name.TrimStart();
-            if (!name.StartsWith("@")) name = "@" + name;
+            var attribute = member.GetCustomAttribute<OledbParam>();
+            if (attribute == null) return null;
 
-            OleDbParameter param = new OleDbParameter()
-            {
-                ParameterName = name,
-                Direction = output ? ParameterDirection.InputOutput : ParameterDirection.Input
-            };
+            string name = attribute.Name ?? member.Name;
+            if (name == null)
+                throw new ArgumentNullException(nameof(name), "Can not insert parameter without name.");
+            else if (!name.StartsWith("@")) name = "@" + name;
 
-            com.Parameters.Add(param);
-            return param;
+            OleDbParameter parameter;
+            // find the exists parameter
+            if (com.Parameters.Contains(name)) parameter = com.Parameters[name];
+            // create new if not exists
+            else parameter = new OleDbParameter() { ParameterName = name };
+
+            if (attribute.Type != null) parameter.OleDbType = attribute.Type.Value;
+            if (attribute.Size != null) parameter.Size = attribute.Size.Value;
+
+            return parameter;
         }
-        OleDbParameter IOledbConnection.AddParameter(string name, OleDbType type, bool output)
+        
+        protected override DbParameter SetParam(string name,
+            object type = null, int? size = null, bool? output = null)
         {
-            name = name.TrimStart();
-            if (!name.StartsWith("@")) name = "@" + name;
-
-            OleDbParameter param = new OleDbParameter
-            {
-                ParameterName = name,
-                OleDbType = type,
-                Direction = output ? ParameterDirection.InputOutput : ParameterDirection.Input
-            };
-
-            com.Parameters.Add(param);
-            return param;
-        }
-        OleDbParameter IOledbConnection.AddParameter(string name, OleDbType type, int size, bool output)
-        {
-            name = name.TrimStart();
-            if (!name.StartsWith("@")) name = "@" + name;
-
-            OleDbParameter param = new OleDbParameter
-            {
-                ParameterName = name,
-                OleDbType = type,
-                Size = size,
-                Direction = output ? ParameterDirection.InputOutput : ParameterDirection.Input
-            };
-
-            com.Parameters.Add(param);
-            return param;
+            if (type is OleDbType oledb_type) return SetParameter(name, oledb_type, size, output);
+            else if (type is DbType db_type) return SetParameter(name, Typeof(db_type), size, output);
+            else if (type is string str_type && Enum.TryParse(str_type, out oledb_type))
+                return SetParameter(name, oledb_type, size, output);
+            else return SetParameter(name, null, size, output);
         }
 
-        private static OleDbType type_of(DbType type)
+        public OleDbParameter SetParameter(string name,
+            OleDbType? type = null, int? size = null, bool? output = null)
+        {
+            if (name == null)
+                throw new ArgumentNullException(nameof(name), "Can not insert parameter without name.");
+            else if (!name.StartsWith("@")) name = "@" + name;
+
+            OleDbParameter parameter;
+            // find the exists parameter
+            if (com.Parameters.Contains(name)) parameter = com.Parameters[name];
+            // create new if not exists
+            else parameter = new OleDbParameter() { ParameterName = name };
+
+            if (type != null) parameter.OleDbType = type.Value;
+            if (size != null) parameter.Size = size.Value;
+            if (output != null) parameter.Direction = output.Value ?
+                    ParameterDirection.InputOutput : ParameterDirection.Input;
+
+            return parameter;
+        }
+
+        private static OleDbType Typeof(DbType type)
         {
             return type switch
             {
@@ -244,19 +253,6 @@ namespace Photon.Database
                 //     Other is not supported.
                 _ => throw new ArgumentOutOfRangeException(nameof(type)),
             };
-        }
-
-        public override DbParameter AddParameter(string name, bool output = false)
-        {
-            return ((IOledbConnection)this).AddParameter(name, output);
-        }
-        public override DbParameter AddParameter(string name, DbType type, bool output = false)
-        {
-            return ((IOledbConnection)this).AddParameter(name, type_of(type), output);
-        }
-        public override DbParameter AddParameter(string name, DbType type, int size, bool output = false)
-        {
-            return ((IOledbConnection)this).AddParameter(name, type_of(type), size, output);
         }
         #endregion
 

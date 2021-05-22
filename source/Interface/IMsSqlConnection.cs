@@ -14,9 +14,7 @@ namespace Photon.Database
 
         new SqlParameterCollection Parameters { get; }
 
-        new SqlParameter AddParameter(string name, bool output = false);
-        SqlParameter AddParameter(string name, SqlDbType type, bool output = false);
-        SqlParameter AddParameter(string name, SqlDbType type, int size, bool output = false);
-        SqlParameter AddParameter(string name, string udt_type, bool output = false);
+        SqlParameter SetParameter(string name, SqlDbType? type = null, int? size = null, bool? output = null);
+        SqlParameter SetParameter(string name, string udt_type, bool? output = null);
     }
 }

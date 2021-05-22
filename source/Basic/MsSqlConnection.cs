@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using System.Reflection;
 
 namespace Photon.Database
 {
@@ -49,7 +50,7 @@ namespace Photon.Database
         }
         IMsSqlConnection IMsSqlConnection.Clone()
         {
-            return  new MsSqlConnection(con);
+            return new MsSqlConnection(con);
         }
 
         public override ConnectionPath ConnectionString
@@ -89,69 +90,72 @@ namespace Photon.Database
         {
             get { return com.Parameters; }
         }
-        SqlParameter IMsSqlConnection.AddParameter(string name, bool output)
+
+        protected override DbParameter SetParam(MemberInfo member)
         {
-            name = name.TrimStart();
-            if (!name.StartsWith("@")) name = "@" + name;
+            var attribute = member.GetCustomAttribute<MsSqlParam>();
+            if (attribute == null) return null;
 
-            SqlParameter param = new SqlParameter()
-            {
-                ParameterName = name,
-                Direction = output ? ParameterDirection.InputOutput : ParameterDirection.Input
-            };
+            string name = attribute.Name ?? member.Name;
+            if (name == null)
+                throw new ArgumentNullException(nameof(name), "Can not insert parameter without name.");
+            else if (!name.StartsWith("@")) name = "@" + name;
 
-            com.Parameters.Add(param);
-            return param;
+            SqlParameter parameter;
+            // find the exists parameter
+            if (com.Parameters.Contains(name)) parameter = com.Parameters[name];
+            // create new if not exists
+            else parameter = new SqlParameter() { ParameterName = name };
+
+            if (attribute.Type != null) parameter.SqlDbType = attribute.Type.Value;
+            if (attribute.Size != null) parameter.Size = attribute.Size.Value;
+
+            return parameter;
         }
-        SqlParameter IMsSqlConnection.AddParameter(string name, SqlDbType type, bool output)
+        
+        protected override DbParameter SetParam(string name,
+            object type = null, int? size = null, bool? output = null)
         {
-            name = name.TrimStart();
-            if (!name.StartsWith("@")) name = "@" + name;
-
-            SqlParameter param = new SqlParameter
-            {
-                ParameterName = name,
-                SqlDbType = type,
-                Direction = output ? ParameterDirection.InputOutput : ParameterDirection.Input
-            };
-
-            com.Parameters.Add(param);
-            return param;
-        }
-        SqlParameter IMsSqlConnection.AddParameter(string name, SqlDbType type, int size, bool output)
-        {
-            name = name.TrimStart();
-            if (!name.StartsWith("@")) name = "@" + name;
-
-            SqlParameter param = new SqlParameter
-            {
-                ParameterName = name,
-                SqlDbType = type,
-                Size = size,
-                Direction = output ? ParameterDirection.InputOutput : ParameterDirection.Input
-            };
-
-            com.Parameters.Add(param);
-            return param;
-        }
-        SqlParameter IMsSqlConnection.AddParameter(string name, string udt_type, bool output)
-        {
-            name = name.TrimStart();
-            if (!name.StartsWith("@")) name = "@" + name;
-
-            SqlParameter param = new SqlParameter
-            {
-                ParameterName = name,
-                SqlDbType = SqlDbType.Udt,
-                UdtTypeName = udt_type,
-                Direction = output ? ParameterDirection.InputOutput : ParameterDirection.Input
-            };
-
-            com.Parameters.Add(param);
-            return param;
+            if (type is SqlDbType sql_type) return SetParameter(name, sql_type, size, output);
+            else if (type is DbType db_type) return SetParameter(name, Typeof(db_type), size, output);
+            else if (type is string str_type && Enum.TryParse(str_type, out sql_type))
+                return SetParameter(name, sql_type, size, output);
+            else return SetParameter(name, null, size, output);
         }
 
-        private static SqlDbType type_of(DbType type)
+        public SqlParameter SetParameter(string name,
+            SqlDbType? type = null, int? size = null, bool? output = null)
+        {
+            if (name == null)
+                throw new ArgumentNullException(nameof(name), "Can not insert parameter without name.");
+            else if (!name.StartsWith("@")) name = "@" + name;
+
+            SqlParameter parameter;
+            // find the exists parameter
+            if (com.Parameters.Contains(name)) parameter = com.Parameters[name];
+            // create new if not exists
+            else parameter = new SqlParameter() { ParameterName = name };
+
+            if (type != null) parameter.SqlDbType = type.Value;
+            if (size != null) parameter.Size = size.Value;
+            if (output != null) parameter.Direction = output.Value ?
+                    ParameterDirection.InputOutput : ParameterDirection.Input;
+
+            return parameter;
+        }
+        
+        public SqlParameter SetParameter(string name, string udt_type, bool? output)
+        {
+            SqlParameter parameter = SetParameter(name, type: SqlDbType.Udt, output: output);
+
+            parameter.UdtTypeName = udt_type;
+            if (output != null) parameter.Direction = output.Value ?
+                    ParameterDirection.InputOutput : ParameterDirection.Input;
+
+            return parameter;
+        }
+
+        private static SqlDbType Typeof(DbType type)
         {
             return type switch
             {
@@ -255,19 +259,6 @@ namespace Photon.Database
                 //     Other is not supported.
                 _ => throw new ArgumentOutOfRangeException(nameof(type)),
             };
-        }
-
-        public override DbParameter AddParameter(string name, bool output = false)
-        {
-            return ((IMsSqlConnection)this).AddParameter(name, output);
-        }
-        public override DbParameter AddParameter(string name, DbType type, bool output = false)
-        {
-            return ((IMsSqlConnection)this).AddParameter(name, type_of(type), output);
-        }
-        public override DbParameter AddParameter(string name, DbType type, int size, bool output = false)
-        {
-            return ((IMsSqlConnection)this).AddParameter(name, type_of(type), size, output);
         }
         #endregion
     }
