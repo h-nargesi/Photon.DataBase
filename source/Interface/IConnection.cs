@@ -42,6 +42,10 @@ namespace Photon.Database
         int ExecuteNonQuery();
         DbDataReader ExecuteReader();
         object ExecuteScalar();
+
+        int ExecuteNonQuerySafe();
+        DbDataReader ExecuteReaderSafe();
+        object ExecuteScalarSafe();
         #endregion
 
 
