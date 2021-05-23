@@ -61,6 +61,8 @@ namespace Photon.Database
         byte[] GetBytes(string index);
         string GetName(int index);
         int GetOrdinal(string name);
+        
+        Dictionary<string, int> GetColumns();
         #endregion
 
 

@@ -143,7 +143,7 @@ namespace Photon.Database
         {
             if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
                 con.Open();
-                
+
             cor_is_reading = false;
             cor = com.ExecuteReader();
             return cor;
@@ -231,6 +231,18 @@ namespace Photon.Database
             return cor.GetOrdinal(name);
         }
 
+        public Dictionary<string, int> GetColumns()
+        {
+            if (cor == null)
+                throw new DatabaseException("The command is not executed.");
+
+            var result = new Dictionary<string, int>();
+            for (int i = 0; i < cor.FieldCount; i++)
+                result.Add(cor.GetName(i), i);
+                
+            return result;
+        }
+
         public IEnumerator GetEnumerator()
         {
             if (cor == null)
@@ -246,7 +258,7 @@ namespace Photon.Database
             get { return com.Parameters; }
         }
 
-        protected abstract DbParameter SetParam(string name, 
+        protected abstract DbParameter SetParam(string name,
             object type = null, int? size = null, bool? output = null);
         protected abstract DbParameter SetParam(MemberInfo member);
 
