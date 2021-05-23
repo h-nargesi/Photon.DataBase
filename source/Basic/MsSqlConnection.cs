@@ -53,7 +53,7 @@ namespace Photon.Database
             return new MsSqlConnection(con);
         }
 
-        public override ConnectionPath ConnectionString
+        public override IConnectionPath ConnectionString
         {
             get { return path; }
             set

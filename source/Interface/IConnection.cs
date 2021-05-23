@@ -15,7 +15,7 @@ namespace Photon.Database
 
 
         #region Connection:
-        ConnectionPath ConnectionString { get; set; }
+        IConnectionPath ConnectionString { get; set; }
         int ConnectionTimeout { get; }
         string Database { get; }
         ConnectionState State { get; }

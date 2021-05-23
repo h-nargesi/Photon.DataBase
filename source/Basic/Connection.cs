@@ -33,7 +33,7 @@ namespace Photon.Database
 
 
         #region Connection:
-        public abstract ConnectionPath ConnectionString { get; set; }
+        public abstract IConnectionPath ConnectionString { get; set; }
         public int ConnectionTimeout
         {
             get { return con.ConnectionTimeout; }

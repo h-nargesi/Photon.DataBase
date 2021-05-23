@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Photon.Database
 {
-    public class OledbConnectionPath : ConnectionPath
+    public class OledbConnectionPath : IConnectionPath
     {
         public OledbConnectionPath(string Path, string Password)
         {
@@ -79,7 +79,7 @@ namespace Photon.Database
         public string Username { get { return user; } }
         public string Password { get { return pass; } }
 
-        public override ConnectionPath Copy()
+        public IConnectionPath Copy()
         {
             if (db == null)
                 return new OledbConnectionPath(provider, path, pass);

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Photon.Database
 {
-    public class SQLConnectionPath : ConnectionPath
+    public class SQLConnectionPath : IConnectionPath
     {
         public SQLConnectionPath(string Server, string DataBase,
             string Username, string Password)
@@ -102,7 +102,7 @@ namespace Photon.Database
         public string Password { get { return pass; } }
         public string AttachDbFilename { get { return attach; } }
 
-        public override ConnectionPath Copy()
+        public IConnectionPath Copy()
         {
             return new SQLConnectionPath(
                 server, db, user, pass, attach,

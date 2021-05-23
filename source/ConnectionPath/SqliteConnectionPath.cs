@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Photon.Database
 {
-    public class SqliteConnectionPath : ConnectionPath
+    public class SqliteConnectionPath : IConnectionPath
     {
         public SqliteConnectionPath(string path) : this(path, null) {}
         
@@ -17,7 +17,7 @@ namespace Photon.Database
 
         public readonly string path, password;
         
-        public override ConnectionPath Copy()
+        public IConnectionPath Copy()
         {
             return new SqliteConnectionPath(path, password);
         }

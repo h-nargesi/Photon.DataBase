@@ -48,7 +48,7 @@ namespace Photon.Database
             return new SqliteConnection(con);
         }
 
-        public override ConnectionPath ConnectionString
+        public override IConnectionPath ConnectionString
         {
             get { return path; }
             set

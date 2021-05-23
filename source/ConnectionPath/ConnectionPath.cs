@@ -24,9 +24,9 @@ namespace Photon.Database
         Provider=msidxs;Data source=myCatalog;
     */
 
-    public abstract class ConnectionPath
+    public interface IConnectionPath
     {
-        public abstract ConnectionPath Copy();
+        IConnectionPath Copy();
     }
 
     public delegate void ConnectionStingSetHandler(object sender, EventArgs e);
