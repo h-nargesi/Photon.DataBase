@@ -21,6 +21,7 @@ namespace Photon.Database
         ConnectionState State { get; }
         IConnection Clone();
         void Open();
+        void OpenSafe();
         void CloseConnection();
         void Close();
         #endregion

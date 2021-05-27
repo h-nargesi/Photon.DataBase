@@ -52,6 +52,14 @@ namespace Photon.Database
             con.Open();
             com.Connection = con;
         }
+        public void OpenSafe()
+        {
+            if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
+            {
+                con.Open();
+                com.Connection = con;
+            }
+        }
         public void CloseConnection()
         {
             Rollback();
@@ -133,6 +141,7 @@ namespace Photon.Database
         {
             return com.ExecuteScalar();
         }
+
         public int ExecuteNonQuerySafe()
         {
             if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
@@ -239,7 +248,7 @@ namespace Photon.Database
             var result = new Dictionary<string, int>();
             for (int i = 0; i < cor.FieldCount; i++)
                 result.Add(cor.GetName(i), i);
-                
+
             return result;
         }
 
