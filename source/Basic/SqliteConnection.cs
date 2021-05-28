@@ -78,6 +78,36 @@ namespace Photon.Database
             ConnectionStringChange?.Invoke(this, new EventArgs());
         }
 
+        public override T GetValue<T>(int index)
+        {
+            return (T)SafeValue(typeof(T), this[index]);
+        }
+        public override T GetValue<T>(string index)
+        {
+            return (T)SafeValue(typeof(T), this[index]);
+        }
+        private object SafeValue(Type type, object value)
+        {
+            if (value is DBNull) return null;
+            else if (value is long long_val)
+            {
+                if (type == typeof(int) || type == typeof(int?)) return (int)long_val;
+                else if (type == typeof(short) || type == typeof(short?)) return (short)long_val;
+                else if (type == typeof(byte) || type == typeof(byte?)) return (byte)long_val;
+                else if (type == typeof(bool) || type == typeof(bool?)) return long_val != 0;
+                else if (type == typeof(DateTime) || type == typeof(DateTime?))
+                    return new DateTime(long_val);
+                else return long_val;
+            }
+            else if (value is double double_val)
+            {
+                if (type == typeof(float) || type == typeof(float?))
+                    return (float)double_val;
+                else return double_val;
+            }
+
+            return value;
+        }
 
         #region Parameters:
         SQLiteParameterCollection ISqliteConnection.Parameters

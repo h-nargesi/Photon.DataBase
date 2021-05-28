@@ -146,7 +146,7 @@ namespace Photon.Database
         {
             if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
                 Open();
-            
+
             return com.ExecuteNonQuery();
         }
         public DbDataReader ExecuteReaderSafe()
@@ -162,7 +162,7 @@ namespace Photon.Database
         {
             if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
                 Open();
-            
+
             return com.ExecuteScalar();
         }
         #endregion
@@ -240,6 +240,15 @@ namespace Photon.Database
             if (cor == null)
                 throw new DatabaseException("The command is not executed.");
             return cor.GetOrdinal(name);
+        }
+
+        public virtual T GetValue<T>(int index) where T : struct
+        {
+            return (T) cor?[index];
+        }
+        public virtual T GetValue<T>(string index) where T : struct
+        {
+            return (T) cor?[index];
         }
 
         public Dictionary<string, int> GetColumns()
