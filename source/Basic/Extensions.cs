@@ -44,7 +44,7 @@ namespace Photon.Database.Extensions
 
             connection.CommandText = query;
             using (var reader = connection.ExecuteReaderSafe())
-                if (reader.Read()) return (L)reader[0];
+                if (reader.Read()) return connection.GetValue<L>(0);
                 else throw new Exception("Not found");
         }
         public static Nullable<L> LiteralNullable<L>(this IConnection connection, string query, object model = null) where L : struct
@@ -57,7 +57,7 @@ namespace Photon.Database.Extensions
 
             connection.CommandText = query;
             using (var reader = connection.ExecuteReaderSafe())
-                if (reader.Read()) return (Nullable<L>)reader[0];
+                if (reader.Read()) return connection.GetValue<Nullable<L>>(0);
                 else return null;
         }
         public static List<L> LiteralList<L>(this IConnection connection, string query, object model = null)
@@ -72,7 +72,7 @@ namespace Photon.Database.Extensions
 
             connection.CommandText = query;
             using (var reader = connection.ExecuteReaderSafe())
-                while (reader.Read()) list.Add((L)reader[0]);
+                while (reader.Read()) list.Add(connection.GetValue<L>(0));
 
             return list;
         }
@@ -88,7 +88,7 @@ namespace Photon.Database.Extensions
 
             connection.CommandText = query;
             using (var reader = connection.ExecuteReaderSafe())
-                while (reader.Read()) list.Add((K)reader[0], (V)reader[1]);
+                while (reader.Read()) list.Add(connection.GetValue<K>(0), connection.GetValue<V>(1));
 
             return list;
         }

@@ -242,11 +242,11 @@ namespace Photon.Database
             return cor.GetOrdinal(name);
         }
 
-        public virtual T GetValue<T>(int index) where T : struct
+        public virtual T GetValue<T>(int index)
         {
             return (T) cor?[index];
         }
-        public virtual T GetValue<T>(string index) where T : struct
+        public virtual T GetValue<T>(string index)
         {
             return (T) cor?[index];
         }
