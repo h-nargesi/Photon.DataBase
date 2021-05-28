@@ -145,13 +145,14 @@ namespace Photon.Database
         public int ExecuteNonQuerySafe()
         {
             if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
-                con.Open();
+                Open();
+            
             return com.ExecuteNonQuery();
         }
         public DbDataReader ExecuteReaderSafe()
         {
             if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
-                con.Open();
+                Open();
 
             cor_is_reading = false;
             cor = com.ExecuteReader();
@@ -160,7 +161,8 @@ namespace Photon.Database
         public object ExecuteScalarSafe()
         {
             if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
-                con.Open();
+                Open();
+            
             return com.ExecuteScalar();
         }
         #endregion
