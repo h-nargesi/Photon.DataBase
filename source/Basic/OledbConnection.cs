@@ -99,14 +99,18 @@ namespace Photon.Database
             // find the exists parameter
             if (com.Parameters.Contains(name)) parameter = com.Parameters[name];
             // create new if not exists
-            else parameter = new OleDbParameter() { ParameterName = name };
+            else
+            {
+                parameter = new OleDbParameter() { ParameterName = name };
+                com.Parameters.Add(parameter);
+            }
 
             if (attribute.Type != null) parameter.OleDbType = attribute.Type.Value;
             if (attribute.Size != null) parameter.Size = attribute.Size.Value;
 
             return parameter;
         }
-        
+
         protected override DbParameter SetParam(string name,
             object type = null, int? size = null, bool? output = null)
         {
@@ -128,7 +132,11 @@ namespace Photon.Database
             // find the exists parameter
             if (com.Parameters.Contains(name)) parameter = com.Parameters[name];
             // create new if not exists
-            else parameter = new OleDbParameter() { ParameterName = name };
+            else
+            {
+                parameter = new OleDbParameter() { ParameterName = name };
+                com.Parameters.Add(parameter);
+            }
 
             if (type != null) parameter.OleDbType = type.Value;
             if (size != null) parameter.Size = size.Value;

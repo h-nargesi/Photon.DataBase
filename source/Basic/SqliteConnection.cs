@@ -123,13 +123,17 @@ namespace Photon.Database
             string name = attribute.Name ?? member.Name;
             if (name == null)
                 throw new ArgumentNullException(nameof(name), "Can not insert parameter without name.");
-            else if (!name.StartsWith("@")) name = "@" + name;
+            else if (!name.StartsWith("$")) name = "$" + name;
 
             SQLiteParameter parameter;
             // find the exists parameter
             if (com.Parameters.Contains(name)) parameter = com.Parameters[name];
             // create new if not exists
-            else parameter = new SQLiteParameter() { ParameterName = name };
+            else
+            {
+                parameter = new SQLiteParameter() { ParameterName = name };
+                com.Parameters.Add(parameter);
+            }
 
             if (attribute.Type != null) parameter.DbType = attribute.Type.Value;
             if (attribute.Size != null) parameter.Size = attribute.Size.Value;
@@ -149,13 +153,17 @@ namespace Photon.Database
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name), "Can not insert parameter without name.");
-            else if (!name.StartsWith("@")) name = "@" + name;
+            else if (!name.StartsWith("$")) name = "$" + name;
 
             SQLiteParameter parameter;
             // find the exists parameter
             if (com.Parameters.Contains(name)) parameter = com.Parameters[name];
             // create new if not exists
-            else parameter = new SQLiteParameter() { ParameterName = name };
+            else
+            {
+                parameter = new SQLiteParameter() { ParameterName = name };
+                com.Parameters.Add(parameter);
+            }
 
             if (type != null) parameter.DbType = type.Value;
             if (size != null) parameter.Size = size.Value;
