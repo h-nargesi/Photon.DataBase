@@ -140,6 +140,23 @@ namespace Photon.Database
 
             return parameter;
         }
+        protected override DbParameter SetFreeParam(MemberInfo member)
+        {
+            string name = member.Name;
+            if (!name.StartsWith("@")) name = "@" + name;
+            
+            SQLiteParameter parameter;
+            // find the exists parameter
+            if (com.Parameters.Contains(name)) parameter = com.Parameters[name];
+            // create new if not exists
+            else
+            {
+                parameter = new SQLiteParameter() { ParameterName = name };
+                com.Parameters.Add(parameter);
+            }
+
+            return parameter;
+        }
 
         protected override DbParameter SetParam(string name,
             object type = null, int? size = null, bool? output = null)

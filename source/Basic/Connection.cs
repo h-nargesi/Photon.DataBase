@@ -244,11 +244,11 @@ namespace Photon.Database
 
         public virtual T GetValue<T>(int index)
         {
-            return (T) cor?[index];
+            return (T)cor?[index];
         }
         public virtual T GetValue<T>(string index)
         {
-            return (T) cor?[index];
+            return (T)cor?[index];
         }
 
         public Dictionary<string, int> GetColumns()
@@ -281,6 +281,7 @@ namespace Photon.Database
         protected abstract DbParameter SetParam(string name,
             object type = null, int? size = null, bool? output = null);
         protected abstract DbParameter SetParam(MemberInfo member);
+        protected abstract DbParameter SetFreeParam(MemberInfo member);
 
         public DbParameter SetParameter(string name, DbType? type, int? size = null, bool? output = null)
         {
@@ -456,6 +457,31 @@ namespace Photon.Database
             return this;
         }
 
+        /// <summary>
+        /// To set parameters from a anonymous model
+        /// if parameter exists in sql command handler, it will edit.
+        /// </summary>
+        /// <param name="model">an object which can be anonymous type</param>
+        /// <returns>It returns this object to continue call other method</returns>
+        public IConnection SetFreeParameters(object model)
+        {
+            if (model == null) throw new ArgumentNullException(nameof(model));
+
+            // is model an sql-model
+            var type = model.GetType();
+
+            // parse properties
+            foreach (var property in type.GetProperties())
+                SetFreeParameter(property, property.GetValue(model));
+
+            // parse fields
+            foreach (var field in type.GetFields())
+                SetFreeParameter(field, field.GetValue(model));
+
+            // continue
+            return this;
+        }
+
         private DbParameter SetParameter(MemberInfo member, object value)
         {
             DbParameter parameter = SetParam(member);
@@ -468,12 +494,23 @@ namespace Photon.Database
                 var sql_list = member.GetCustomAttribute<SqlList>();
                 if (sql_list != null)
                     if (value is Array array) parameter.Value = GetSqlListValue(array);
-                    else parameter.Value = DBNull.Value;
+                    else parameter.Value = value;
             }
 
             // check direction
             var dir = member.GetCustomAttribute<SqlDirection>();
             if (dir != null) parameter.Direction = dir.Direction;
+
+            return parameter;
+        }
+        private DbParameter SetFreeParameter(MemberInfo member, object value)
+        {
+            DbParameter parameter = SetFreeParam(member);
+            if (parameter == null) return null;
+
+            // check value
+            if (value == null) parameter.Value = DBNull.Value;
+            else parameter.Value = value;
 
             return parameter;
         }

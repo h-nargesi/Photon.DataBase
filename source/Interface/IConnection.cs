@@ -119,6 +119,14 @@ namespace Photon.Database
         /// <param name="filters">filter the properties or feilds of model</param>
         /// <returns>It returns this object to continue call other method</returns>
         IConnection SetParameters(object model, HashSet<string> filters);
+
+        /// <summary>
+        /// To set parameters from a anonymous model
+        /// if parameter exists in sql command handler, it will edit.
+        /// </summary>
+        /// <param name="model">an object which can be anonymous type</param>
+        /// <returns>It returns this object to continue call other method</returns>
+        IConnection SetFreeParameters(object model);
         #endregion
     }
 }
