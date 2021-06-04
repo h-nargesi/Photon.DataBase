@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Threading.Tasks;
 
 namespace Photon.Database
 {
@@ -21,17 +22,23 @@ namespace Photon.Database
         ConnectionState State { get; }
         IConnection Clone();
         void Open();
-        void OpenSafe();
+        Task OpenAsync();
+        Task OpenSafe();
         void CloseConnection();
+        Task CloseConnectionAsync();
         void Close();
+        Task CloseAsync();
         #endregion
 
 
         #region Transaction:
         void BeginTransaction();
+        Task BeginTransactionAsync();
         bool HasTransaction { get; }
         void Commit();
+        Task CommitAsync();
         void Rollback();
+        Task RollbackAsync();
         #endregion
 
 
@@ -44,9 +51,13 @@ namespace Photon.Database
         DbDataReader ExecuteReader();
         object ExecuteScalar();
 
-        int ExecuteNonQuerySafe();
-        DbDataReader ExecuteReaderSafe();
-        object ExecuteScalarSafe();
+        Task<int> ExecuteNonQueryAsync();
+        Task<DbDataReader> ExecuteReaderAsync();
+        Task<object> ExecuteScalarAsync();
+
+        Task<int> ExecuteNonQuerySafe();
+        Task<DbDataReader> ExecuteReaderSafe();
+        Task<object> ExecuteScalarSafe();
         #endregion
 
 
@@ -55,12 +66,15 @@ namespace Photon.Database
         object this[string index] { get; }
 
         bool ReaderIsClosed { get; }
-        bool IsReading { get; }
         int FieldCount { get; }
 
         bool Read();
         bool NextResult();
         void CloseReader();
+
+        Task<bool> ReadAsync();
+        Task<bool> NextResultAsync();
+        Task CloseReaderAsync();
 
         byte[] GetBytes(int index);
         byte[] GetBytes(string index);

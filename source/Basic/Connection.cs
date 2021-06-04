@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Photon.Database
 {
@@ -15,7 +16,6 @@ namespace Photon.Database
         private readonly DbCommand com; // handler
         private DbDataReader cor; // data_reader
         private DbTransaction trx; // transaction
-        private bool cor_is_reading; // is_reading
 
         public abstract event ConnectionStingSetHandler ConnectionStringChange;
         public event EventHandler Disposed
@@ -52,11 +52,16 @@ namespace Photon.Database
             con.Open();
             com.Connection = con;
         }
-        public void OpenSafe()
+        public async Task OpenAsync()
+        {
+            await con.OpenAsync();
+            com.Connection = con;
+        }
+        public async Task OpenSafe()
         {
             if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
             {
-                con.Open();
+                await con.OpenAsync();
                 com.Connection = con;
             }
         }
@@ -65,11 +70,22 @@ namespace Photon.Database
             Rollback();
             con.Close();
         }
+        public async Task CloseConnectionAsync()
+        {
+            await RollbackAsync();
+            con.Close();
+        }
         public void Close()
         {
             if (cor != null && !cor.IsClosed) cor.Close();
             Rollback();
             con.Close();
+        }
+        public async Task CloseAsync()
+        {
+            if (cor != null && !cor.IsClosed) await cor.CloseAsync();
+            await RollbackAsync();
+            await con.CloseAsync();
         }
 
         public void Dispose()
@@ -87,6 +103,10 @@ namespace Photon.Database
         {
             trx = con.BeginTransaction();
         }
+        public async Task BeginTransactionAsync()
+        {
+            trx = await con.BeginTransactionAsync();
+        }
         public bool HasTransaction
         {
             get { return trx != null; }
@@ -99,6 +119,16 @@ namespace Photon.Database
                 trx = null;
             }
         }
+        public Task CommitAsync()
+        {
+            if (trx != null)
+            {
+                var t = trx;
+                trx = null;
+                return t.CommitAsync();
+            }
+            else return Task.CompletedTask;
+        }
         public void Rollback()
         {
             if (trx != null)
@@ -106,6 +136,16 @@ namespace Photon.Database
                 trx.Rollback();
                 trx = null;
             }
+        }
+        public Task RollbackAsync()
+        {
+            if (trx != null)
+            {
+                var t = trx;
+                trx = null;
+                return t.RollbackAsync();
+            }
+            else return Task.CompletedTask;
         }
         #endregion
 
@@ -133,7 +173,6 @@ namespace Photon.Database
         }
         public DbDataReader ExecuteReader()
         {
-            cor_is_reading = false;
             cor = com.ExecuteReader();
             return cor;
         }
@@ -142,28 +181,41 @@ namespace Photon.Database
             return com.ExecuteScalar();
         }
 
-        public int ExecuteNonQuerySafe()
+        public Task<int> ExecuteNonQueryAsync()
         {
-            if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
-                Open();
-
-            return com.ExecuteNonQuery();
+            return com.ExecuteNonQueryAsync();
         }
-        public DbDataReader ExecuteReaderSafe()
+        public async Task<DbDataReader> ExecuteReaderAsync()
         {
-            if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
-                Open();
-
-            cor_is_reading = false;
-            cor = com.ExecuteReader();
+            cor = await com.ExecuteReaderAsync();
             return cor;
         }
-        public object ExecuteScalarSafe()
+        public Task<object> ExecuteScalarAsync()
+        {
+            return com.ExecuteScalarAsync();
+        }
+
+        public async Task<int> ExecuteNonQuerySafe()
         {
             if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
-                Open();
+                await OpenAsync();
 
-            return com.ExecuteScalar();
+            return com.ExecuteNonQueryAsync().Result;
+        }
+        public async Task<DbDataReader> ExecuteReaderSafe()
+        {
+            if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
+                await OpenAsync();
+
+            cor = await com.ExecuteReaderAsync();
+            return cor;
+        }
+        public async Task<object> ExecuteScalarSafe()
+        {
+            if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
+                await OpenAsync();
+
+            return com.ExecuteScalarAsync().Result;
         }
         #endregion
 
@@ -182,11 +234,6 @@ namespace Photon.Database
         {
             get { return cor == null || cor.IsClosed; }
         }
-        public bool IsReading
-        {
-            // is usefull for inner subject reading
-            get { return cor != null && !cor.IsClosed && cor_is_reading; }
-        }
         public int FieldCount
         {
             get
@@ -201,20 +248,35 @@ namespace Photon.Database
         {
             if (cor == null)
                 throw new DatabaseException("The command is not executed.");
-            cor_is_reading = cor.Read();
-            return cor_is_reading;
+            return cor.Read();
         }
         public bool NextResult()
         {
             if (cor == null)
                 throw new DatabaseException("The command is not executed.");
-            cor_is_reading = cor.NextResult();
-            return cor_is_reading;
+            return cor.NextResult();
         }
         public void CloseReader()
         {
-            cor_is_reading = false;
-            if (cor != null) cor.Close();
+            cor?.Close();
+        }
+
+        public Task<bool> ReadAsync()
+        {
+            if (cor == null)
+                throw new DatabaseException("The command is not executed.");
+            return cor.ReadAsync();
+        }
+        public Task<bool> NextResultAsync()
+        {
+            if (cor == null)
+                throw new DatabaseException("The command is not executed.");
+            return cor.NextResultAsync();
+        }
+        public Task CloseReaderAsync()
+        {
+            if (cor != null) return cor.CloseAsync();
+            else return Task.CompletedTask;
         }
 
         public byte[] GetBytes(int index)
