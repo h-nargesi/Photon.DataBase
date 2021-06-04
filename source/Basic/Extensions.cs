@@ -10,7 +10,7 @@ namespace Photon.Database.Extensions
 {
     public static class Extensions
     {
-        public static int ExecuteNonQuerySafe(this IConnection connection, string command, object model = null)
+        public static Task<int> ExecuteNonQuerySafe(this IConnection connection, string command, object model = null)
         {
             if (model != null)
             {
@@ -21,7 +21,7 @@ namespace Photon.Database.Extensions
             connection.CommandText = command;
             return connection.ExecuteNonQuerySafe();
         }
-        public static DbDataReader ExecuteReaderSafe(this IConnection connection, string command, object model = null)
+        public static Task<DbDataReader> ExecuteReaderSafe(this IConnection connection, string command, object model = null)
         {
             if (model != null)
             {
@@ -34,7 +34,7 @@ namespace Photon.Database.Extensions
         }
 
 
-        public static L Literal<L>(this IConnection connection, string query, object model = null)
+        public static async Task<L> Literal<L>(this IConnection connection, string query, object model = null)
         {
             if (model != null)
             {
@@ -43,11 +43,11 @@ namespace Photon.Database.Extensions
             }
 
             connection.CommandText = query;
-            using (var reader = connection.ExecuteReaderSafe())
-                if (reader.Read()) return connection.GetValue<L>(0);
+            using (var reader = await connection.ExecuteReaderSafe())
+                if (await reader.ReadAsync()) return connection.GetValue<L>(0);
                 else throw new Exception("Not found");
         }
-        public static Nullable<L> LiteralNullable<L>(this IConnection connection, string query, object model = null) where L : struct
+        public static async Task<Nullable<L>> LiteralNullable<L>(this IConnection connection, string query, object model = null) where L : struct
         {
             if (model != null)
             {
@@ -56,11 +56,11 @@ namespace Photon.Database.Extensions
             }
 
             connection.CommandText = query;
-            using (var reader = connection.ExecuteReaderSafe())
-                if (reader.Read()) return connection.GetValue<Nullable<L>>(0);
+            using (var reader = await connection.ExecuteReaderSafe())
+                if (await reader.ReadAsync()) return connection.GetValue<Nullable<L>>(0);
                 else return null;
         }
-        public static List<L> LiteralList<L>(this IConnection connection, string query, object model = null)
+        public static async Task<List<L>> LiteralList<L>(this IConnection connection, string query, object model = null)
         {
             var list = new List<L>();
 
@@ -71,12 +71,12 @@ namespace Photon.Database.Extensions
             }
 
             connection.CommandText = query;
-            using (var reader = connection.ExecuteReaderSafe())
-                while (reader.Read()) list.Add(connection.GetValue<L>(0));
+            using (var reader = await connection.ExecuteReaderSafe())
+                while (await reader.ReadAsync()) list.Add(connection.GetValue<L>(0));
 
             return list;
         }
-        public static Dictionary<K, V> LiteralGroup<K, V>(this IConnection connection, string query, object model = null)
+        public static async Task<Dictionary<K, V>> LiteralGroup<K, V>(this IConnection connection, string query, object model = null)
         {
             var list = new Dictionary<K, V>();
 
@@ -87,12 +87,12 @@ namespace Photon.Database.Extensions
             }
 
             connection.CommandText = query;
-            using (var reader = connection.ExecuteReaderSafe())
-                while (reader.Read()) list.Add(connection.GetValue<K>(0), connection.GetValue<V>(1));
+            using (var reader = await connection.ExecuteReaderSafe())
+                while (await reader.ReadAsync()) list.Add(connection.GetValue<K>(0), connection.GetValue<V>(1));
 
             return list;
         }
-        public static Dictionary<string, object> LiteralObject(this IConnection connection, string query, object model = null)
+        public static async Task<Dictionary<string, object>> LiteralObject(this IConnection connection, string query, object model = null)
         {
             var obj = new Dictionary<string, object>();
 
@@ -103,15 +103,15 @@ namespace Photon.Database.Extensions
             }
 
             connection.CommandText = query;
-            using (var reader = connection.ExecuteReaderSafe())
-                while (reader.Read())
+            using (var reader = await connection.ExecuteReaderSafe())
+                while (await reader.ReadAsync())
                     for (int i = 0; i < reader.FieldCount; i++)
                         obj.Add(reader.GetName(i), reader[i]);
 
             return obj;
         }
 
-        public static bool Exists(this IConnection connection, string query, object model = null)
+        public static Task<bool> Exists(this IConnection connection, string query, object model = null)
         {
             query = $@"select case when exists ({query}) then 1 else 0 end as ext";
             return Literal<bool>(connection, query, model);
