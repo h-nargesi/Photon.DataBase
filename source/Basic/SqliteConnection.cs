@@ -41,7 +41,7 @@ namespace Photon.Database
 
         public override IConnection Clone()
         {
-            return ((IOledbConnection)this).Clone();
+            return ((ISqliteConnection)this).Clone();
         }
         ISqliteConnection ISqliteConnection.Clone()
         {
