@@ -43,11 +43,11 @@ namespace Photon.Database.Extensions
             }
 
             connection.CommandText = query;
-            using (var reader = await connection.ExecuteReaderSafe())
-                if (await reader.ReadAsync()) return connection.GetValue<L>(0);
-                else throw new Exception("Not found");
+            using var reader = await connection.ExecuteReaderSafe();
+            if (await reader.ReadAsync()) return connection.GetValue<L>(0);
+            else throw new Exception("Not found");
         }
-        public static async Task<Nullable<L>> LiteralNullable<L>(this IConnection connection, string query, object model = null) where L : struct
+        public static async Task<L?> LiteralNullable<L>(this IConnection connection, string query, object model = null) where L : struct
         {
             if (model != null)
             {
@@ -56,9 +56,9 @@ namespace Photon.Database.Extensions
             }
 
             connection.CommandText = query;
-            using (var reader = await connection.ExecuteReaderSafe())
-                if (await reader.ReadAsync()) return connection.GetValue<Nullable<L>>(0);
-                else return null;
+            using var reader = await connection.ExecuteReaderSafe();
+            if (await reader.ReadAsync()) return connection.GetValue<L?>(0);
+            else return null;
         }
         public static async Task<List<L>> LiteralList<L>(this IConnection connection, string query, object model = null)
         {

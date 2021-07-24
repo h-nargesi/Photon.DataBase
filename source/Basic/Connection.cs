@@ -281,27 +281,19 @@ namespace Photon.Database
 
         public byte[] GetBytes(int index)
         {
-            if (cor == null)
-                throw new DatabaseException("The command is not executed.");
-            return cor.GetValue(index) as byte[];
+            return cor?.GetValue(index) as byte[];
         }
         public byte[] GetBytes(string index)
         {
-            if (cor == null)
-                throw new DatabaseException("The command is not executed.");
-            return cor.GetValue(cor.GetOrdinal(index)) as byte[];
+            return cor?.GetValue(cor.GetOrdinal(index)) as byte[];
         }
         public string GetName(int index)
         {
-            if (cor == null)
-                throw new DatabaseException("The command is not executed.");
-            return cor.GetName(index);
+            return cor?.GetName(index);
         }
         public int GetOrdinal(string name)
         {
-            if (cor == null)
-                throw new DatabaseException("The command is not executed.");
-            return cor.GetOrdinal(name);
+            return cor?.GetOrdinal(name) ?? -1;
         }
 
         public virtual T GetValue<T>(int index)
