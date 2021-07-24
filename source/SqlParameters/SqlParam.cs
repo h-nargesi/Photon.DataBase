@@ -15,5 +15,6 @@ namespace Photon.Database
 
         public string Name { get; }
         public int? Size { get; }
+        public DbType? DbType { get; }
     }
 }
