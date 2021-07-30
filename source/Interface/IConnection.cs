@@ -46,6 +46,7 @@ namespace Photon.Database
         string CommandText { get; set; }
         int CommandTimeout { get; set; }
         CommandType CommandType { get; set; }
+        object LastInsertedID { get; }
 
         int ExecuteNonQuery();
         DbDataReader ExecuteReader();

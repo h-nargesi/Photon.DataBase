@@ -78,6 +78,11 @@ namespace Photon.Database
             ConnectionStringChange?.Invoke(this, new EventArgs());
         }
 
+        public override object LastInsertedID
+        {
+            get { return con.LastInsertRowId; }
+        }
+
         public override T GetValue<T>(int index)
         {
             return (T)SafeValue(typeof(T), this[index]);

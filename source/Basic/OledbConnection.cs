@@ -79,6 +79,8 @@ namespace Photon.Database
             ConnectionStringChange?.Invoke(this, new EventArgs());
         }
 
+        public override object LastInsertedID => throw new NotImplementedException();
+
 
         #region Parameters:
         OleDbParameterCollection IOledbConnection.Parameters

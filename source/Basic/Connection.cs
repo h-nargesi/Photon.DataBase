@@ -166,6 +166,7 @@ namespace Photon.Database
             get { return com.CommandType; }
             set { com.CommandType = value; }
         }
+        public abstract object LastInsertedID { get; }
 
         public int ExecuteNonQuery()
         {
