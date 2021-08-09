@@ -168,42 +168,42 @@ namespace Photon.Database
         }
         public abstract object LastInsertedID { get; }
 
-        public int ExecuteNonQuery()
+        public virtual int ExecuteNonQuery()
         {
             return com.ExecuteNonQuery();
         }
-        public DbDataReader ExecuteReader()
+        public virtual DbDataReader ExecuteReader()
         {
             cor = com.ExecuteReader();
             return cor;
         }
-        public object ExecuteScalar()
+        public virtual object ExecuteScalar()
         {
             return com.ExecuteScalar();
         }
 
-        public Task<int> ExecuteNonQueryAsync()
+        public virtual Task<int> ExecuteNonQueryAsync()
         {
             return com.ExecuteNonQueryAsync();
         }
-        public async Task<DbDataReader> ExecuteReaderAsync()
+        public virtual async Task<DbDataReader> ExecuteReaderAsync()
         {
             cor = await com.ExecuteReaderAsync();
             return cor;
         }
-        public Task<object> ExecuteScalarAsync()
+        public virtual Task<object> ExecuteScalarAsync()
         {
             return com.ExecuteScalarAsync();
         }
 
-        public async Task<int> ExecuteNonQuerySafe()
+        public virtual async Task<int> ExecuteNonQuerySafe()
         {
             if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
                 await OpenAsync();
 
             return com.ExecuteNonQueryAsync().Result;
         }
-        public async Task<DbDataReader> ExecuteReaderSafe()
+        public virtual async Task<DbDataReader> ExecuteReaderSafe()
         {
             if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
                 await OpenAsync();
@@ -211,7 +211,7 @@ namespace Photon.Database
             cor = await com.ExecuteReaderAsync();
             return cor;
         }
-        public async Task<object> ExecuteScalarSafe()
+        public virtual async Task<object> ExecuteScalarSafe()
         {
             if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
                 await OpenAsync();
@@ -236,14 +236,7 @@ namespace Photon.Database
             get { return cor == null || cor.IsClosed; }
         }
         public int FieldCount
-        {
-            get
-            {
-                if (cor == null)
-                    throw new DatabaseException("The command is not executed.");
-                return cor.FieldCount;
-            }
-        }
+            => cor?.FieldCount ?? throw new DatabaseException("The command is not executed.");
 
         public bool Read()
         {

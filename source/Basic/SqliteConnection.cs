@@ -5,12 +5,15 @@ using System.Data.SQLite;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using System.Reflection;
+using Photon.Database.Procedures;
 
 namespace Photon.Database
 {
     public class SqliteConnection : Connection, ISqliteConnection
     {
+        private readonly ProcedureRegister procedures;
         private readonly SQLiteConnection con;
         private readonly SQLiteCommand com;
         private SqliteConnectionPath path;
@@ -33,10 +36,19 @@ namespace Photon.Database
             this.con = con;
             this.com = com;
         }
-        private SqliteConnection(SQLiteConnection con) : base(con, Com(out SQLiteCommand com))
+        public SqliteConnection(ProcedureRegister procedures) 
+            : base(Con(out SQLiteConnection con), Com(out SQLiteCommand com))
         {
             this.con = con;
             this.com = com;
+            this.procedures = procedures;
+        }
+        private SqliteConnection(SQLiteConnection con, ProcedureRegister procedures) 
+            : base(con, Com(out SQLiteCommand com))
+        {
+            this.con = con;
+            this.com = com;
+            this.procedures = procedures;
         }
 
         public override IConnection Clone()
@@ -45,7 +57,7 @@ namespace Photon.Database
         }
         ISqliteConnection ISqliteConnection.Clone()
         {
-            return new SqliteConnection(con);
+            return new SqliteConnection(con, procedures);
         }
 
         public override IConnectionPath ConnectionString
@@ -113,6 +125,79 @@ namespace Photon.Database
 
             return value;
         }
+
+
+        #region Procedures
+        public override int ExecuteNonQuery()
+        {
+            if (CommandType == CommandType.StoredProcedure)
+                return (int)procedures.Call(CommandText, this);
+            else return base.ExecuteNonQuery();
+        }
+        public override DbDataReader ExecuteReader()
+        {
+            if (CommandType == CommandType.StoredProcedure)
+                return (DbDataReader)procedures.Call(CommandText, this);
+            else return base.ExecuteReader();
+        }
+        public override object ExecuteScalar()
+        {
+            if (CommandType == CommandType.StoredProcedure)
+                return procedures.Call(CommandText, this);
+            else return base.ExecuteScalar();
+        }
+
+        public override Task<int> ExecuteNonQueryAsync()
+        {
+            if (CommandType == CommandType.StoredProcedure)
+                return procedures.Call(CommandText, this) as Task<int>;
+            else return base.ExecuteNonQueryAsync();
+        }
+        public override Task<DbDataReader> ExecuteReaderAsync()
+        {
+            if (CommandType == CommandType.StoredProcedure)
+                return procedures.Call(CommandText, this) as Task<DbDataReader>;
+            else return base.ExecuteReaderAsync();
+        }
+        public override Task<object> ExecuteScalarAsync()
+        {
+            if (CommandType == CommandType.StoredProcedure)
+                return procedures.Call(CommandText, this) as Task<object>;
+            else return base.ExecuteScalarAsync();
+        }
+
+        public override async Task<int> ExecuteNonQuerySafe()
+        {
+            if (CommandType == CommandType.StoredProcedure)
+            {
+                if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
+                    await OpenAsync();
+                return await (procedures.Call(CommandText, this) as Task<int>);
+            }
+            else return await base.ExecuteNonQuerySafe();
+        }
+        public override async Task<DbDataReader> ExecuteReaderSafe()
+        {
+            if (CommandType == CommandType.StoredProcedure)
+            {
+                if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
+                    await OpenAsync();
+                return await (procedures.Call(CommandText, this) as Task<DbDataReader>);
+            }
+            else return await base.ExecuteReaderSafe();
+        }
+        public override async Task<object> ExecuteScalarSafe()
+        {
+            if (CommandType == CommandType.StoredProcedure)
+            {
+                if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
+                    await OpenAsync();
+                return await (procedures.Call(CommandText, this) as Task<object>);
+            }
+            else return await base.ExecuteScalarSafe();
+        }
+        #endregion
+
 
         #region Parameters:
         SQLiteParameterCollection ISqliteConnection.Parameters
