@@ -60,6 +60,19 @@ namespace Photon.Database.Extensions
             if (await reader.ReadAsync()) return connection.GetValue<L?>(0);
             else return null;
         }
+        public static async Task<L> LiteralValue<L>(this IConnection connection, string query, object model = null) where L : class
+        {
+            if (model != null)
+            {
+                connection.Parameters.Clear();
+                connection.SetParameters(model);
+            }
+
+            connection.CommandText = query;
+            using var reader = await connection.ExecuteReaderSafe();
+            if (await reader.ReadAsync()) return connection.GetValue<L>(0);
+            else return null;
+        }
         public static async Task<List<L>> LiteralList<L>(this IConnection connection, string query, object model = null)
         {
             var list = new List<L>();
