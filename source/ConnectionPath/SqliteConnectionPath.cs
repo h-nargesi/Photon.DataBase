@@ -29,7 +29,7 @@ namespace Photon.Database
             string result = $"Data Source={path};";
             if (version != null) result += $"Version={version};";
             if (password != null) result += $"Password={password};";
-            if (foreign_keys != null) result += $"foreign_keys={foreign_keys.ToString().ToLower()}";
+            if (foreign_keys != null) result += $"foreign keys={foreign_keys.ToString().ToLower()}";
             return result;
         }
     }
