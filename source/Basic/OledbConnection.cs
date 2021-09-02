@@ -18,9 +18,10 @@ namespace Photon.Database
 
         public override event ConnectionStingSetHandler ConnectionStringChange;
 
-        private static OleDbConnection Con(out OleDbConnection con)
+        private static OleDbConnection Con(out OleDbConnection con, string connection_string = null)
         {
-            con = new OleDbConnection();
+            if (connection_string == null) con = new OleDbConnection();
+            else con = new OleDbConnection(connection_string);
             return con;
         }
         private static OleDbCommand Com(out OleDbCommand com)
@@ -34,15 +35,16 @@ namespace Photon.Database
             this.con = con;
             this.com = com;
         }
-        private OledbConnection(OleDbConnection con) : base(con, Com(out OleDbCommand com))
+        private OledbConnection(OleDbConnection con) : 
+            base(Con(out OleDbConnection new_con, con.ConnectionString), Com(out OleDbCommand com))
         {
-            this.con = con;
+            this.con = new_con;
             this.com = com;
         }
 
         public override IConnection Clone()
         {
-            return ((IOledbConnection)this).Clone();
+            return (this as IOledbConnection).Clone();
         }
         IOledbConnection IOledbConnection.Clone()
         {

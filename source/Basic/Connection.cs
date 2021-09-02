@@ -47,17 +47,17 @@ namespace Photon.Database
             get { return con.State; }
         }
         public abstract IConnection Clone();
-        public void Open()
+        public virtual void Open()
         {
             con.Open();
             com.Connection = con;
         }
-        public async Task OpenAsync()
+        public virtual async Task OpenAsync()
         {
             await con.OpenAsync();
             com.Connection = con;
         }
-        public async Task OpenSafe()
+        public virtual async Task OpenSafe()
         {
             if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
             {

@@ -23,9 +23,10 @@ namespace Photon.Database
             remove { con.InfoMessage -= value; }
         }
 
-        private static SqlConnection Con(out SqlConnection con)
+        private static SqlConnection Con(out SqlConnection con, string connection_string = null)
         {
-            con = new SqlConnection();
+            if (connection_string == null) con = new SqlConnection();
+            else con = new SqlConnection(connection_string);
             return con;
         }
         private static SqlCommand Com(out SqlCommand com)
@@ -39,15 +40,16 @@ namespace Photon.Database
             this.con = con;
             this.com = com;
         }
-        private MsSqlConnection(SqlConnection con) : base(con, Com(out SqlCommand com))
+        private MsSqlConnection(SqlConnection con) 
+            : base(Con(out SqlConnection new_con, con.ConnectionString), Com(out SqlCommand com))
         {
-            this.con = con;
+            this.con = new_con;
             this.com = com;
         }
 
         public override IConnection Clone()
         {
-            return ((IMsSqlConnection)this).Clone();
+            return (this as IMsSqlConnection).Clone();
         }
         IMsSqlConnection IMsSqlConnection.Clone()
         {

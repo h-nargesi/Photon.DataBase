@@ -26,7 +26,8 @@ namespace Photon.Database.Procedures
         {
             if (name == null) throw new ArgumentNullException(nameof(name));
             if (procedure == null) throw new ArgumentNullException(nameof(procedure));
-            procedures.Add(name, procedure);
+
+            lock (procedures) procedures.Add(name, procedure);
         }
     }
 }

@@ -20,9 +20,10 @@ namespace Photon.Database
 
         public override event ConnectionStingSetHandler ConnectionStringChange;
 
-        private static SQLiteConnection Con(out SQLiteConnection con)
+        private static SQLiteConnection Con(out SQLiteConnection con, string connection_string = null)
         {
-            con = new SQLiteConnection();
+            if (connection_string == null) con = new SQLiteConnection();
+            else con = new SQLiteConnection(connection_string);
             return con;
         }
         private static SQLiteCommand Com(out SQLiteCommand com)
@@ -36,24 +37,24 @@ namespace Photon.Database
             this.con = con;
             this.com = com;
         }
-        public SqliteConnection(ProcedureRegister procedures) 
+        public SqliteConnection(ProcedureRegister procedures)
             : base(Con(out SQLiteConnection con), Com(out SQLiteCommand com))
         {
             this.con = con;
             this.com = com;
             this.procedures = procedures;
         }
-        private SqliteConnection(SQLiteConnection con, ProcedureRegister procedures) 
-            : base(con, Com(out SQLiteCommand com))
+        private SqliteConnection(SQLiteConnection con, ProcedureRegister procedures)
+            : base(Con(out SQLiteConnection new_con, con.ConnectionString), Com(out SQLiteCommand com))
         {
-            this.con = con;
+            this.con = new_con;
             this.com = com;
             this.procedures = procedures;
         }
 
         public override IConnection Clone()
         {
-            return ((ISqliteConnection)this).Clone();
+            return (this as ISqliteConnection).Clone();
         }
         ISqliteConnection ISqliteConnection.Clone()
         {
@@ -125,6 +126,42 @@ namespace Photon.Database
 
             return value;
         }
+
+
+        #region Pragma
+        public string Pragma { get; set; }
+        public void ExecutePragma()
+        {
+            if (Pragma != null)
+            {
+                var command_temp = CommandText;
+                try
+                {
+                    CommandText = Pragma;
+                    ExecuteNonQuery();
+                }
+                finally { CommandText = command_temp; }
+            }
+        }
+        public override void Open()
+        {
+            base.Open();
+            ExecutePragma();
+        }
+        public override async Task OpenAsync()
+        {
+            await base.OpenAsync();
+            ExecutePragma();
+        }
+        public override async Task OpenSafe()
+        {
+            if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
+            {
+                await base.OpenAsync();
+                ExecutePragma();
+            }
+        }
+        #endregion
 
 
         #region Procedures
@@ -234,7 +271,7 @@ namespace Photon.Database
         {
             string name = member.Name;
             if (!name.StartsWith("@")) name = "@" + name;
-            
+
             SQLiteParameter parameter;
             // find the exists parameter
             if (com.Parameters.Contains(name)) parameter = com.Parameters[name];
