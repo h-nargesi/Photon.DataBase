@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{
 		document\release-notes.md = document\release-notes.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tester", "tester\Tester.csproj", "{4D2674FA-BDE0-4F72-8985-3C5BEB6B7C7B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,18 @@ Global
 		{232225DC-A5EE-4D72-AA01-3E1D0BEC7640}.Release|x64.Build.0 = Release|x64
 		{232225DC-A5EE-4D72-AA01-3E1D0BEC7640}.Release|x86.ActiveCfg = Release|Any CPU
 		{232225DC-A5EE-4D72-AA01-3E1D0BEC7640}.Release|x86.Build.0 = Release|Any CPU
+		{4D2674FA-BDE0-4F72-8985-3C5BEB6B7C7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D2674FA-BDE0-4F72-8985-3C5BEB6B7C7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D2674FA-BDE0-4F72-8985-3C5BEB6B7C7B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4D2674FA-BDE0-4F72-8985-3C5BEB6B7C7B}.Debug|x64.Build.0 = Debug|Any CPU
+		{4D2674FA-BDE0-4F72-8985-3C5BEB6B7C7B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4D2674FA-BDE0-4F72-8985-3C5BEB6B7C7B}.Debug|x86.Build.0 = Debug|Any CPU
+		{4D2674FA-BDE0-4F72-8985-3C5BEB6B7C7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D2674FA-BDE0-4F72-8985-3C5BEB6B7C7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D2674FA-BDE0-4F72-8985-3C5BEB6B7C7B}.Release|x64.ActiveCfg = Release|Any CPU
+		{4D2674FA-BDE0-4F72-8985-3C5BEB6B7C7B}.Release|x64.Build.0 = Release|Any CPU
+		{4D2674FA-BDE0-4F72-8985-3C5BEB6B7C7B}.Release|x86.ActiveCfg = Release|Any CPU
+		{4D2674FA-BDE0-4F72-8985-3C5BEB6B7C7B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

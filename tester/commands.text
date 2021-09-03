@@ -1,0 +1,12 @@
+type:sqlite
+con:db.sqlite3
+open
+
+com:select p.ID as Project, m.ID as Mime from Mimes m left join Projects p on p.ID = m.ObjectID limit 5
+exer
+
+com:delete from UniqueIDs where ObjectID = 89
+exec
+
+com:select p.ID as Project, m.ID as Mime from Mimes m left join Projects p on p.ID = m.ObjectID limit 5
+exer
