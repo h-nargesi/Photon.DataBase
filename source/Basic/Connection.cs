@@ -433,7 +433,12 @@ namespace Photon.Database
             // Value {object}
             pro = deftype.GetProperty("Value");
             if (pro != null) value = pro.GetValue(definition);
-            parameter.Value = value ?? DBNull.Value;
+            if (value is DbValue db_value)
+            {
+                parameter.Value = db_value.Value ?? DBNull.Value;
+                parameter.Value = db_value.Type;
+            }
+            else parameter.Value = value ?? DBNull.Value;
 
             return this;
         }
@@ -537,6 +542,11 @@ namespace Photon.Database
 
             // check value
             if (value == null) parameter.Value = DBNull.Value;
+            else if (value is DbValue db_value)
+            {
+                parameter.Value = db_value.Value ?? DBNull.Value;
+                parameter.Value = db_value.Type;
+            }
             else
             {
                 var sql_list = member.GetCustomAttribute<SqlList>();
@@ -557,8 +567,12 @@ namespace Photon.Database
             if (parameter == null) return null;
 
             // check value
-            if (value == null) parameter.Value = DBNull.Value;
-            else parameter.Value = value;
+            if (value is DbValue db_value)
+            {
+                parameter.Value = db_value.Value ?? DBNull.Value;
+                parameter.Value = db_value.Type;
+            }
+            else parameter.Value = value ?? DBNull.Value;
 
             return parameter;
         }

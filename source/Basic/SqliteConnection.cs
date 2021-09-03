@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
+using Photon.Database.Extensions;
 using Photon.Database.Procedures;
 
 namespace Photon.Database
@@ -226,8 +227,10 @@ namespace Photon.Database
                 com.Parameters.Add(parameter);
             }
 
-            if (attribute.Type != null) parameter.DbType = attribute.Type.Value;
             if (attribute.Size != null) parameter.Size = attribute.Size.Value;
+            if (attribute.Type != null) parameter.DbType = attribute.Type.Value;
+            else if (member.DeclaringType != null && member.DeclaringType != typeof(DbValue))
+                parameter.DbType = member.DeclaringType.GetDbType();
 
             return parameter;
         }
@@ -246,13 +249,21 @@ namespace Photon.Database
                 com.Parameters.Add(parameter);
             }
 
+            if (member.DeclaringType != null && member.DeclaringType != typeof(DbValue))
+                parameter.DbType = member.DeclaringType.GetDbType();
+
             return parameter;
         }
 
         protected override DbParameter SetParam(string name,
             object type = null, int? size = null, bool? output = null)
         {
-            if (type is DbType db_type || type is string str_type && Enum.TryParse(str_type, out db_type))
+
+            if (type is DbType db_type)
+                return (this as ISqliteConnection).SetParameter(name, db_type, size, output);
+            else if (type is Type sys_type)
+                return (this as ISqliteConnection).SetParameter(name, sys_type.GetDbType(), size, output);
+            else if (type is string str_type && Enum.TryParse(str_type, out db_type))
                 return (this as ISqliteConnection).SetParameter(name, db_type, size, output);
             else return (this as ISqliteConnection).SetParameter(name, null, size, output);
         }

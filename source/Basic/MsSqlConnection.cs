@@ -116,8 +116,10 @@ namespace Photon.Database
                 com.Parameters.Add(parameter);
             }
 
-            if (attribute.Type != null) parameter.SqlDbType = attribute.Type.Value;
             if (attribute.Size != null) parameter.Size = attribute.Size.Value;
+            if (attribute.Type != null) parameter.SqlDbType = attribute.Type.Value;
+            else if (member.DeclaringType != null && member.DeclaringType != typeof(DbValue))
+                parameter.SqlDbType = member.DeclaringType.GetDbType().GetSqlDbType();
 
             return parameter;
         }
@@ -136,6 +138,9 @@ namespace Photon.Database
                 com.Parameters.Add(parameter);
             }
 
+            if (member.DeclaringType != null && member.DeclaringType != typeof(DbValue))
+                parameter.SqlDbType = member.DeclaringType.GetDbType().GetSqlDbType();
+
             return parameter;
         }
 
@@ -144,6 +149,7 @@ namespace Photon.Database
         {
             if (type is SqlDbType sql_type) return SetParameter(name, sql_type, size, output);
             else if (type is DbType db_type) return SetParameter(name, db_type.GetSqlDbType(), size, output);
+            else if (type is Type sys_type) return SetParameter(name, sys_type.GetDbType().GetSqlDbType(), size, output);
             else if (type is string str_type && Enum.TryParse(str_type, out sql_type))
                 return SetParameter(name, sql_type, size, output);
             else return SetParameter(name, null, size, output);

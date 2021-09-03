@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 
 namespace Photon.Database
 {
+	[Obsolete]
 	public static class SqlTypeComparetion
 	{
 		public static bool SingleTypeComparetion(SingleType stype, DbType dbtype)
@@ -63,6 +64,7 @@ namespace Photon.Database
 	
 	}
 
+	[Obsolete]
 	public enum SingleType : byte
 	{
 		Date, Boolean, Variant,
@@ -71,6 +73,7 @@ namespace Photon.Database
 		Guid, Image
 	}
 
+	[Obsolete]
 	public enum StringType : byte
 	{
 		Char, NChar,

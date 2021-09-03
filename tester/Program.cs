@@ -285,8 +285,8 @@ open
 ctype:sp|tx|tb
 param:
     add:    name,int|string
-        name,int|string,vlaue
-    remove: name
+            name,int|string,vlaue
+    remove:name
     get:name
     name:int,value
 com:command_string
