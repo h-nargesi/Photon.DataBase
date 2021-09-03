@@ -128,42 +128,6 @@ namespace Photon.Database
         }
 
 
-        #region Pragma
-        public string Pragma { get; set; }
-        public void ExecutePragma()
-        {
-            if (Pragma != null)
-            {
-                var command_temp = CommandText;
-                try
-                {
-                    CommandText = Pragma;
-                    ExecuteNonQuery();
-                }
-                finally { CommandText = command_temp; }
-            }
-        }
-        public override void Open()
-        {
-            base.Open();
-            ExecutePragma();
-        }
-        public override async Task OpenAsync()
-        {
-            await base.OpenAsync();
-            ExecutePragma();
-        }
-        public override async Task OpenSafe()
-        {
-            if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
-            {
-                await base.OpenAsync();
-                ExecutePragma();
-            }
-        }
-        #endregion
-
-
         #region Procedures
         public override int ExecuteNonQuery()
         {
