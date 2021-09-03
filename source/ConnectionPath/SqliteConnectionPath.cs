@@ -26,10 +26,10 @@ namespace Photon.Database
 
         public override string ToString()
         {
-            string result = $"Data Source={path};";
-            if (version != null) result += $"Version={version};";
-            if (password != null) result += $"Password={password};";
-            if (foreign_keys != null) result += $"foreign keys={foreign_keys.ToString().ToLower()}";
+            string result = $"Data Source={path}";
+            if (version != null) result += $";Version={version}";
+            if (password != null) result += $";Password={password}";
+            if (foreign_keys != null) result += $";Foreign Keys={foreign_keys}";
             return result;
         }
     }
