@@ -96,7 +96,7 @@ namespace Photon.Database
             get { return com.Parameters; }
         }
 
-        protected override DbParameter SetParam(MemberInfo member)
+        protected override DbParameter SetParam(MemberInfo member, Type value_type)
         {
             var attribute = member.GetCustomAttribute<MsSqlParam>();
             if (attribute == null) return null;
@@ -118,12 +118,12 @@ namespace Photon.Database
 
             if (attribute.Size != null) parameter.Size = attribute.Size.Value;
             if (attribute.Type != null) parameter.SqlDbType = attribute.Type.Value;
-            else if (member.DeclaringType != null && member.DeclaringType != typeof(DbValue))
-                parameter.SqlDbType = member.DeclaringType.GetDbType().GetSqlDbType();
+            else if (value_type != null && value_type != typeof(DbValue))
+                parameter.SqlDbType = value_type.GetDbType().GetSqlDbType();
 
             return parameter;
         }
-        protected override DbParameter SetFreeParam(MemberInfo member)
+        protected override DbParameter SetFreeParam(MemberInfo member, Type value_type)
         {
             string name = member.Name;
             if (!name.StartsWith("@")) name = "@" + name;
@@ -138,8 +138,8 @@ namespace Photon.Database
                 com.Parameters.Add(parameter);
             }
 
-            if (member.DeclaringType != null && member.DeclaringType != typeof(DbValue))
-                parameter.SqlDbType = member.DeclaringType.GetDbType().GetSqlDbType();
+            if (value_type != null && value_type != typeof(DbValue))
+                parameter.SqlDbType = value_type.GetDbType().GetSqlDbType();
 
             return parameter;
         }

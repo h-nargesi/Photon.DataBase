@@ -328,8 +328,8 @@ namespace Photon.Database
 
         protected abstract DbParameter SetParam(string name,
             object type = null, int? size = null, bool? output = null);
-        protected abstract DbParameter SetParam(MemberInfo member);
-        protected abstract DbParameter SetFreeParam(MemberInfo member);
+        protected abstract DbParameter SetParam(MemberInfo member, Type value_type);
+        protected abstract DbParameter SetFreeParam(MemberInfo member, Type value_type);
 
         public DbParameter SetParameter(string name, DbType? type, int? size = null, bool? output = null)
         {
@@ -460,11 +460,11 @@ namespace Photon.Database
 
             // parse properties
             foreach (var property in type.GetProperties())
-                SetParameter(property, property.GetValue(model));
+                SetParameter(property, property.PropertyType, property.GetValue(model));
 
             // parse fields
             foreach (var field in type.GetFields())
-                SetParameter(field, field.GetValue(model));
+                SetParameter(field, field.FieldType, field.GetValue(model));
 
             // continue
             return this;
@@ -489,7 +489,7 @@ namespace Photon.Database
             // parse properties
             foreach (var property in type.GetProperties())
                 if (filters.Contains(property.Name) &&
-                    SetParameter(property, property.GetValue(model)) != null)
+                    SetParameter(property, property.PropertyType, property.GetValue(model)) != null)
                 {
                     filters.Remove(property.Name);
                     if (filters.Count < 1) return this;
@@ -500,7 +500,7 @@ namespace Photon.Database
             // parse fields
             foreach (var field in type.GetFields())
                 if (filters.Contains(field.Name) &&
-                    SetParameter(field, field.GetValue(model)) != null)
+                    SetParameter(field, field.FieldType, field.GetValue(model)) != null)
                 {
                     filters.Remove(field.Name);
                     if (filters.Count < 1) break;
@@ -525,19 +525,19 @@ namespace Photon.Database
 
             // parse properties
             foreach (var property in type.GetProperties())
-                SetFreeParameter(property, property.GetValue(model));
+                SetFreeParameter(property, property.PropertyType, property.GetValue(model));
 
             // parse fields
             foreach (var field in type.GetFields())
-                SetFreeParameter(field, field.GetValue(model));
+                SetFreeParameter(field, field.FieldType, field.GetValue(model));
 
             // continue
             return this;
         }
 
-        private DbParameter SetParameter(MemberInfo member, object value)
+        private DbParameter SetParameter(MemberInfo member, Type value_type, object value)
         {
-            DbParameter parameter = SetParam(member);
+            DbParameter parameter = SetParam(member, value_type);
             if (parameter == null) return null;
 
             // check value
@@ -561,9 +561,9 @@ namespace Photon.Database
 
             return parameter;
         }
-        private DbParameter SetFreeParameter(MemberInfo member, object value)
+        private DbParameter SetFreeParameter(MemberInfo member, Type value_type, object value)
         {
-            DbParameter parameter = SetFreeParam(member);
+            DbParameter parameter = SetFreeParam(member, value_type);
             if (parameter == null) return null;
 
             // check value

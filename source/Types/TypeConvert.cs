@@ -456,7 +456,7 @@ namespace Photon.Database.Extensions
         public static DbType GetDbType(this Type type)
         {
             if (!SYSTEM_TYPE_MAP.ContainsKey(type))
-                throw new ArgumentOutOfRangeException(nameof(type));
+                throw new ArgumentOutOfRangeException(nameof(type), type.FullName);
             else return SYSTEM_TYPE_MAP[type];
         }
 

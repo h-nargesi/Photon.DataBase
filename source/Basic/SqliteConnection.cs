@@ -207,7 +207,7 @@ namespace Photon.Database
             get { return com.Parameters; }
         }
 
-        protected override DbParameter SetParam(MemberInfo member)
+        protected override DbParameter SetParam(MemberInfo member, Type value_type)
         {
             var attribute = member.GetCustomAttribute<SqliteParam>();
             if (attribute == null) return null;
@@ -229,15 +229,15 @@ namespace Photon.Database
 
             if (attribute.Size != null) parameter.Size = attribute.Size.Value;
             if (attribute.Type != null) parameter.DbType = attribute.Type.Value;
-            else if (member.DeclaringType != null && member.DeclaringType != typeof(DbValue))
-                parameter.DbType = member.DeclaringType.GetDbType();
+            else if (value_type != null && value_type != typeof(DbValue))
+                parameter.DbType = value_type.GetDbType();
 
             return parameter;
         }
-        protected override DbParameter SetFreeParam(MemberInfo member)
+        protected override DbParameter SetFreeParam(MemberInfo member, Type value_type)
         {
             string name = member.Name;
-            if (!name.StartsWith("@")) name = "@" + name;
+            if (!name.StartsWith("$")) name = "$" + name;
 
             SQLiteParameter parameter;
             // find the exists parameter
@@ -249,8 +249,8 @@ namespace Photon.Database
                 com.Parameters.Add(parameter);
             }
 
-            if (member.DeclaringType != null && member.DeclaringType != typeof(DbValue))
-                parameter.DbType = member.DeclaringType.GetDbType();
+            if (value_type != null && value_type != typeof(DbValue))
+                parameter.DbType = value_type.GetDbType();
 
             return parameter;
         }
