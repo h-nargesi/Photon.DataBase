@@ -37,6 +37,7 @@ namespace Photon.Database
         {
             this.con = con;
             this.com = com;
+            procedures = new ProcedureRegister();
         }
         public SqliteConnection(ProcedureRegister procedures)
             : base(Con(out SQLiteConnection con), Com(out SQLiteCommand com))
