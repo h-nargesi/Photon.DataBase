@@ -161,7 +161,7 @@ namespace Photon.Database
             get { return com.CommandTimeout; }
             set { com.CommandTimeout = value; }
         }
-        public CommandType CommandType
+        public virtual CommandType CommandType
         {
             get { return com.CommandType; }
             set { com.CommandType = value; }
@@ -174,8 +174,7 @@ namespace Photon.Database
         }
         public virtual DbDataReader ExecuteReader()
         {
-            cor = com.ExecuteReader();
-            return cor;
+            return cor = com.ExecuteReader();
         }
         public virtual object ExecuteScalar()
         {
@@ -188,8 +187,7 @@ namespace Photon.Database
         }
         public virtual async Task<DbDataReader> ExecuteReaderAsync()
         {
-            cor = await com.ExecuteReaderAsync();
-            return cor;
+            return cor = await com.ExecuteReaderAsync();
         }
         public virtual Task<object> ExecuteScalarAsync()
         {
@@ -201,22 +199,39 @@ namespace Photon.Database
             if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
                 await OpenAsync();
 
-            return com.ExecuteNonQueryAsync().Result;
+            if (cor != null)
+            {
+                cor.Close();
+                cor = null;
+            }
+
+            return await com.ExecuteNonQueryAsync();
         }
         public virtual async Task<DbDataReader> ExecuteReaderSafe()
         {
             if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
                 await OpenAsync();
 
-            cor = await com.ExecuteReaderAsync();
-            return cor;
+            if (cor != null)
+            {
+                cor.Close();
+                cor = null;
+            }
+
+            return cor = await com.ExecuteReaderAsync();
         }
         public virtual async Task<object> ExecuteScalarSafe()
         {
             if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
                 await OpenAsync();
 
-            return com.ExecuteScalarAsync().Result;
+            if (cor != null)
+            {
+                cor.Close();
+                cor = null;
+            }
+
+            return await com.ExecuteScalarAsync();
         }
         #endregion
 

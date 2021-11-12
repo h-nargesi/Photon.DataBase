@@ -13,13 +13,15 @@ namespace Photon.Database.Procedures
 
         private readonly Dictionary<string, ProceduresHandler> procedures;
 
-        public object Call(string name, IConnection connection)
+        public Task<T> Call<T>(string name, IConnection connection)
         {
             ProceduresHandler procedure;
             lock (procedures)
                 procedure = procedures[name];
 
-            return procedure.Invoke(connection);
+            if (!(procedure.Invoke(connection) is Task<T> task))
+                throw new Exception("Invalid type of task result.");
+            return task;
         }
 
         public void Register(string name, ProceduresHandler procedure)

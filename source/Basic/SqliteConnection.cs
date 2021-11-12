@@ -17,6 +17,7 @@ namespace Photon.Database
         private readonly ProcedureRegister procedures;
         private readonly SQLiteConnection con;
         private readonly SQLiteCommand com;
+        private CommandType command_type;
         private SqliteConnectionPath path;
 
         public override event ConnectionStingSetHandler ConnectionStringChange;
@@ -63,6 +64,11 @@ namespace Photon.Database
             return new SqliteConnection(con, procedures);
         }
 
+        public override CommandType CommandType
+        {
+            get { return command_type; }
+            set { command_type = value; }
+        }
         public override IConnectionPath ConnectionString
         {
             get { return path; }
@@ -134,70 +140,58 @@ namespace Photon.Database
         public override int ExecuteNonQuery()
         {
             if (CommandType == CommandType.StoredProcedure)
-                return (int)procedures.Call(CommandText, this);
+                return procedures.Call<int>(CommandText, this).Result;
             else return base.ExecuteNonQuery();
         }
         public override DbDataReader ExecuteReader()
         {
             if (CommandType == CommandType.StoredProcedure)
-                return (DbDataReader)procedures.Call(CommandText, this);
+                return procedures.Call< DbDataReader>(CommandText, this).Result;
             else return base.ExecuteReader();
         }
         public override object ExecuteScalar()
         {
             if (CommandType == CommandType.StoredProcedure)
-                return procedures.Call(CommandText, this);
+                return procedures.Call<object>(CommandText, this).Result;
             else return base.ExecuteScalar();
         }
 
         public override Task<int> ExecuteNonQueryAsync()
         {
             if (CommandType == CommandType.StoredProcedure)
-                return procedures.Call(CommandText, this) as Task<int>;
+                return procedures.Call<int>(CommandText, this);
             else return base.ExecuteNonQueryAsync();
         }
         public override Task<DbDataReader> ExecuteReaderAsync()
         {
             if (CommandType == CommandType.StoredProcedure)
-                return procedures.Call(CommandText, this) as Task<DbDataReader>;
+                return procedures.Call<DbDataReader>(CommandText, this);
             else return base.ExecuteReaderAsync();
         }
         public override Task<object> ExecuteScalarAsync()
         {
             if (CommandType == CommandType.StoredProcedure)
-                return procedures.Call(CommandText, this) as Task<object>;
+                return procedures.Call<object>(CommandText, this);
             else return base.ExecuteScalarAsync();
         }
 
-        public override async Task<int> ExecuteNonQuerySafe()
+        public override Task<int> ExecuteNonQuerySafe()
         {
             if (CommandType == CommandType.StoredProcedure)
-            {
-                if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
-                    await OpenAsync();
-                return await (procedures.Call(CommandText, this) as Task<int>);
-            }
-            else return await base.ExecuteNonQuerySafe();
+                return procedures.Call<int>(CommandText, this);
+            else return base.ExecuteNonQuerySafe();
         }
-        public override async Task<DbDataReader> ExecuteReaderSafe()
+        public override Task<DbDataReader> ExecuteReaderSafe()
         {
             if (CommandType == CommandType.StoredProcedure)
-            {
-                if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
-                    await OpenAsync();
-                return await (procedures.Call(CommandText, this) as Task<DbDataReader>);
-            }
-            else return await base.ExecuteReaderSafe();
+                return procedures.Call<DbDataReader>(CommandText, this);
+            else return base.ExecuteReaderSafe();
         }
-        public override async Task<object> ExecuteScalarSafe()
+        public override Task<object> ExecuteScalarSafe()
         {
             if (CommandType == CommandType.StoredProcedure)
-            {
-                if (con.State == ConnectionState.Closed || con.State == ConnectionState.Broken)
-                    await OpenAsync();
-                return await (procedures.Call(CommandText, this) as Task<object>);
-            }
-            else return await base.ExecuteScalarSafe();
+                return procedures.Call<object>(CommandText, this);
+            else return base.ExecuteScalarSafe();
         }
         #endregion
 
